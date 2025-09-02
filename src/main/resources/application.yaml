@@ -1,0 +1,60 @@
+# ======= Server =======
+server:
+  port: 8080
+  compression:
+    enabled: true
+    min-response-size: 2KB
+  http2:
+    enabled: true
+  shutdown: graceful
+  forward-headers-strategy: framework
+  error:
+    include-message: never
+    include-binding-errors: never
+
+spring:
+  application:
+    name: ai-assistant
+  # Для WebFlux специфичных настроек отдельный блок не требуется
+  jackson:
+    # Дефолтная таймзона сериализации дат
+    time-zone: Europe/Moscow
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+# ======= Management / Actuator =======
+management:
+  server:
+    port: 8080
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState
+        liveness:
+          include: livenessState
+  health:
+    defaults:
+      enabled: true
+
+# ======= Logging =======
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    reactor.netty.http.client: WARN
+    reactor.netty.http.server: WARN
+
+# ======= App placeholders (на будущее) =======
+app:
+  timezone: Europe/Moscow
+  telegram:
+    bot-token: ${TG_BOT_TOKEN:REPLACE_ME}
