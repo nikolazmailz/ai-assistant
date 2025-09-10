@@ -49,3 +49,8 @@ logs/
 # === Misc ===
 *.bak
 *.old
+
+# Игнорировать application.yaml
+src/main/resources/application.yaml
+
+application.yaml
