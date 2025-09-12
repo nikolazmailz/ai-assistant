@@ -42,3 +42,65 @@ curl -sS -X POST "https://api.telegram.org/bot<TOKEN>/sendMessage" \
 
 
 ```
+
+
+### 0) Подготовка сервера
+
+
+
+```
+ssh root@
+apt update && apt upgrade -y
+
+# 0) удалить дистрибутивный docker.io, если стоял
+sudo apt-get remove -y docker.io docker-doc docker-compose
+sudo apt-get purge -y docker.io
+sudo apt-get autoremove -y
+# данные в /var/lib/docker останутся (не трогаем)
+
+# 1) подготовка ключа и репозитория Docker
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl gnupg
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu jammy stable" \
+  | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+
+# 2) установка актуальных пакетов Docker + compose v2
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io \
+  docker-buildx-plugin docker-compose-plugin
+
+# 3) автозапуск и проверка демона
+sudo systemctl enable --now docker
+sudo systemctl status docker --no-pager
+
+# 4) проверить версии
+docker --version
+docker compose version
+
+# 5) чтобы не писать sudo
+sudo usermod -aG docker $USER
+# выйди и зайди в сессию (или: newgrp docker), затем проверь:
+docker run --rm hello-world
+
+```
+
+### Создадим каталог проекта:
+```
+mkdir -p /opt/ai-assistant && cd /opt/ai-assistant
+```
+
+### Склонируй свой репозиторий:
+```
+git clone <URL_твоего_repo> .
+```
+
+
+
