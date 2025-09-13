@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: ai-assistant-app
+    environment:
+      TZ: ${TZ}
+      TG_BOT_TOKEN: ${TG_BOT_TOKEN}
+#      TG_WEBHOOK_SECRET: ${TG_WEBHOOK_SECRET}
+    restart: unless-stopped
+    expose:
+      - "8080"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: ai-assistant-nginx
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/nginx/certs:/etc/nginx/certs:ro
