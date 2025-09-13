@@ -31,7 +31,6 @@ kill -9 <PID>
 
 
 ```
-
 1) Быстрая верификация вне кода
 
 Проверь токен/формат полей простым запросом (должно прийти 200 OK):
@@ -39,14 +38,10 @@ kill -9 <PID>
 curl -sS -X POST "https://api.telegram.org/bot<TOKEN>/sendMessage" \
   -H "Content-Type: application/json" \
   -d '{"chat_id": <CHAT_ID>, "text": "ping", "parse_mode": "HTML"}'
-
-
 ```
 
 
 ### 0) Подготовка сервера
-
-
 
 ```
 ssh root@
@@ -92,17 +87,73 @@ docker run --rm hello-world
 
 ```
 
-### Создадим каталог проекта:
+### Открой порты:
 ```
-mkdir -p /opt/ai-assistant && cd /opt/ai-assistant
+ufw allow OpenSSH
+ufw allow 80
+ufw allow 443
+ufw enable
 ```
 
 ### Склонируй свой репозиторий:
 ```
-git clone <URL_твоего_repo> .
+cd /opt
+git clone https://github.com/nikolazmailz/ai-assistant.git
+```
+
+### Сгенерируем самоподписанный cert (на 1 год; CN — публичный IP):
+```declarative
+
+mkdir -p deploy/nginx/certs
+openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 365 \
+-keyout deploy/nginx/certs/server.key \
+-out deploy/nginx/certs/server.crt \
+-subj "/CN=79.143.31.222"
+
 ```
 
 
+### Создадим файл переменных .env (НЕ коммитим):
+```
+cat > .env << 'EOF'
+TZ=Europe/Moscow
+TG_BOT_TOKEN=REPLACE_WITH_YOUR_TOKEN
+# Секрет для заголовка X-Telegram-Bot-Api-Secret-Token
+TG_WEBHOOK_SECRET=
+EOF
+```
+### Сгенерируй и вставь секрет:
+```
+SECRET=$(openssl rand -hex 16)
+sed -i "s|TG_WEBHOOK_SECRET=|TG_WEBHOOK_SECRET=$SECRET|g" .env
+```
 
+### Генерим самоподписанный сертификат
+```
+IP="<ПУБЛИЧНЫЙ_IP_СЕРВЕРА>"
+openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 365 \
+  -keyout deploy/nginx/certs/server.key \
+  -out deploy/nginx/certs/server.crt \
+  -subj "/CN=${IP}"
+```
 
+### Сборка и запуск
+```
+docker compose build
+docker compose up -d
+docker compose ps
 
+curl -k https://<IP>/healthz   
+```
+
+### Установка вебхука c загрузкой сертификата
+```
+source .env
+curl -s -F "url=https://79.143.31.222/tg/webhook" \
+       -F "certificate=@deploy/nginx/certs/server.crt" \
+       "https://api.telegram.org/bot${TG_BOT_TOKEN}/setWebhook"
+
+curl -s "https://api.telegram.org/bot${TG_BOT_TOKEN}/getWebhookInfo"
+
+ -F "secret_token=${TG_WEBHOOK_SECRET}" \
+```
