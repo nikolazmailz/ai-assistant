@@ -148,8 +148,13 @@ curl -k https://<IP>/healthz
 
 ### Установка вебхука c загрузкой сертификата
 ```
+curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/deleteWebhook"
+
+curl -s "https://api.telegram.org/bot${TG_BOT_TOKEN}/getWebhookInfo"
+
 source .env
 curl -s -F "url=https://79.143.31.222/tg/webhook" \
+       -F "secret_token=${TG_WEBHOOK_SECRET}" \
        -F "certificate=@deploy/nginx/certs/server.crt" \
        "https://api.telegram.org/bot${TG_BOT_TOKEN}/setWebhook"
 
