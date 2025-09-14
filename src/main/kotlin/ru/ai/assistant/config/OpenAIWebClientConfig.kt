@@ -1,5 +1,6 @@
 package ru.ai.assistant.config
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -13,11 +14,19 @@ import reactor.netty.transport.ProxyProvider
 @EnableConfigurationProperties(OpenAiProperties::class, ProxyProperties::class)
 class OpenAIWebClientConfig {
 
+    private val log = KotlinLogging.logger {}
+
     @Bean
     fun openaiWebClient(
         openAiProperties: OpenAiProperties,
         proxyProperties: ProxyProperties
     ): WebClient {
+
+        log.debug { "openAiProperties.token ${openAiProperties.token}" }
+        log.debug { "proxyProperties.port ${proxyProperties.port}" }
+        log.debug { "proxyProperties.host ${proxyProperties.host}" }
+        log.debug { "proxyProperties.user ${proxyProperties.user}" }
+        log.debug { "proxyProperties.password ${proxyProperties.password}" }
 
         val httpClient = HttpClient.create()
             .proxy { proxy ->
