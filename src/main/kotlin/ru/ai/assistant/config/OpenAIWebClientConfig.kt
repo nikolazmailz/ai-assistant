@@ -24,7 +24,7 @@ class OpenAIWebClientConfig {
                 proxy
                     .type(ProxyProvider.Proxy.HTTP)
                     .host(proxyProperties.host)
-                    .port(proxyProperties.port)
+                    .port(proxyProperties.port.toInt())
                     .username(proxyProperties.user)
                     .password { proxyProperties.password}
             }
