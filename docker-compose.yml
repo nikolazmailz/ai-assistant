@@ -8,6 +8,11 @@ services:
       TZ: ${TZ}
       TG_BOT_TOKEN: ${TG_BOT_TOKEN}
       TG_WEBHOOK_SECRET: ${TG_WEBHOOK_SECRET}
+      OPENAI_TOKEN: ${OPENAI_TOKEN}
+      PROXY_HOST: ${PROXY_HOST}
+      PROXY_PORT: ${PROXY_PORT}
+      PROXY_USER: ${PROXY_USER}
+      PROXY_PASSWORD: ${PROXY_PASSWORD}
     restart: unless-stopped
     expose:
       - "8080"
