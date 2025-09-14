@@ -60,3 +60,10 @@ app:
   telegram:
     bot-token: ${TG_BOT_TOKEN:}
     webhook-secret: ${TG_WEBHOOK_SECRET:}
+  openai:
+    token: ${OPENAI_TOKEN:}
+  proxy:
+    host: ${PROXY_HOST:}
+    port: ${PROXY_PORT:}
+    user: ${PROXY_USER:}
+    password: ${PROXY_PASSWORD:}

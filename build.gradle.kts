@@ -30,7 +30,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
 
     // Логи (входит в starter), оставляю явно для наглядности
-    implementation("org.springframework.boot:spring-boot-starter-logging")
+//    implementation("org.springframework.boot:spring-boot-starter-logging")
+    implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
 
     // Тесты
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
