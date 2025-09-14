@@ -1,50 +1,72 @@
-### Для локального запуска нужно прокинуть тунель при помощи 
+# AI Assistant Telegram Bot (ai-assistant) 
 
-```ssh
+Ассистент на **Kotlin + Spring Boot (WebFlux)**, работающий через Telegram **Webhook**.  
+Деплой на VPS с **Docker + Nginx (TLS)**. Вариант без домена — используем самоподписанный сертификат.
 
-brew install localtunnel
+## 📦 Стек
+- Kotlin + Spring Boot 3.x (WebFlux)
+- Docker + Docker Compose
+- Nginx (reverse proxy + TLS)
+- Telegram Bot API
+- OpenSSL (генерация самоподписанных сертификатов)
 
-./gradlew clean build
+## 🚀 Быстрый старт
 
-java -jar build/libs/ai-tg-assistant-0.0.1-SNAPSHOT.jar
+## Для локального запуска
 
-lt --port 8080  
+### Клонировать репозиторий
 
-curl -X POST "https://api.telegram.org/bot$1/deleteWebhook"
+```bash
 
-curl "https://api.telegram.org/bot$1/getWebhookInfo"
+cd /opt
+git clone <URL_ТВОЕГО_REPO> ai-assistant
+cd ai-assistant
+```
 
-curl -X POST "https://api.telegram.org/bot$1/setWebhook" \ 
-  -d "url=https://*.loca.lt/tg/webhook"
+### Сборка: 
+``./gradlew clean build``
 
+### Запуск (локально):
+``java -jar build/libs/ai-assistant-0.0.1-SNAPSHOT.jar``
 
-Чтоб остнаноить узнай PID процесса
+Чтоб остнаноить узнай PID процесса:
+```bash
+
 ps -ef | grep ai-assistant
 Заверши процесс
 kill <PID>
 или
 kill -9 <PID>
 
-
 ```
 
+### прокинуть тунель при помощи localtunnel
+```bash
 
-
+brew install localtunnel
+lt --port 8080  
 ```
-1) Быстрая верификация вне кода
+out example: ``your url is: https://better-swans-fly.loca.lt``
 
-Проверь токен/формат полей простым запросом (должно прийти 200 OK):
+Удалить предыдущий Webhook и добавить новый:
+```bash
 
-curl -sS -X POST "https://api.telegram.org/bot<TOKEN>/sendMessage" \
-  -H "Content-Type: application/json" \
-  -d '{"chat_id": <CHAT_ID>, "text": "ping", "parse_mode": "HTML"}'
+curl -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/deleteWebhook"
+
+curl -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/setWebhook" \
+  -d "secret_token=${TG_WEBHOOK_SECRET}" \
+  -d "url=https://ninety-lies-punch.loca.lt/tg/webhook"
 ```
+где /tg/webhook это uri контроллера который будет принимать сообщения от тг-бота
 
+
+## Для запуска на сервере
 
 ### 0) Подготовка сервера
 
-```
-ssh root@
+```bash 
+
+ssh root@ip/host
 apt update && apt upgrade -y
 
 # 0) удалить дистрибутивный docker.io, если стоял
@@ -80,11 +102,8 @@ sudo systemctl status docker --no-pager
 docker --version
 docker compose version
 
-# 5) чтобы не писать sudo
-sudo usermod -aG docker $USER
 # выйди и зайди в сессию (или: newgrp docker), затем проверь:
 docker run --rm hello-world
-
 ```
 
 ### Открой порты:
@@ -95,23 +114,36 @@ ufw allow 443
 ufw enable
 ```
 
-### Склонируй свой репозиторий:
-```
+### Клонировать репозиторий
+
+```bash
+
 cd /opt
-git clone https://github.com/nikolazmailz/ai-assistant.git
+git clone <URL_ТВОЕГО_REPO> ai-assistant
+cd ai-assistant
 ```
 
+В проекте надо добавить:
+- Dockerfile
+- docker-compose.yaml
+- deploy/nginx/nginx.conf
+
 ### Сгенерируем самоподписанный cert (на 1 год; CN — публичный IP):
-```declarative
+```bash
 
 mkdir -p deploy/nginx/certs
 openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 365 \
 -keyout deploy/nginx/certs/server.key \
 -out deploy/nginx/certs/server.crt \
--subj "/CN=79.143.31.222"
+-subj "/CN=$IP"
 
 ```
 
+### Сгенерируй и вставь секрет:
+```bash
+
+TG_WEBHOOK_SECRET=$(openssl rand -hex 16)
+```
 
 ### Создадим файл переменных .env (НЕ коммитим):
 ```
@@ -121,20 +153,6 @@ TG_BOT_TOKEN=REPLACE_WITH_YOUR_TOKEN
 # Секрет для заголовка X-Telegram-Bot-Api-Secret-Token
 TG_WEBHOOK_SECRET=
 EOF
-```
-### Сгенерируй и вставь секрет:
-```
-SECRET=$(openssl rand -hex 16)
-sed -i "s|TG_WEBHOOK_SECRET=|TG_WEBHOOK_SECRET=$SECRET|g" .env
-```
-
-### Генерим самоподписанный сертификат
-```
-IP="<ПУБЛИЧНЫЙ_IP_СЕРВЕРА>"
-openssl req -x509 -newkey rsa:2048 -nodes -sha256 -days 365 \
-  -keyout deploy/nginx/certs/server.key \
-  -out deploy/nginx/certs/server.crt \
-  -subj "/CN=${IP}"
 ```
 
 ### Сборка и запуск
@@ -160,5 +178,15 @@ curl -s -F "url=https://79.143.31.222/tg/webhook" \
 
 curl -s "https://api.telegram.org/bot${TG_BOT_TOKEN}/getWebhookInfo"
 
- -F "secret_token=${TG_WEBHOOK_SECRET}" \
+```
+
+
+
+Быстрая верификация вне кода 
+Проверь токен/формат полей простым запросом (должно прийти 200 OK):
+```bash
+
+curl -sS -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage" \
+  -H "Content-Type: application/json" \
+  -d '{"chat_id": <CHAT_ID>, "text": "ping", "parse_mode": "HTML"}'
 ```

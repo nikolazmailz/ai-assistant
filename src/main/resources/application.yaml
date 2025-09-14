@@ -58,5 +58,5 @@ logging:
 app:
   timezone: Europe/Moscow
   telegram:
-    bot-token: ${TG_BOT_TOKEN:8003259042:}
+    bot-token: ${TG_BOT_TOKEN:}
     webhook-secret: ${TG_WEBHOOK_SECRET:}
