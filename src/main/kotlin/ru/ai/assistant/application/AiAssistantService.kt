@@ -16,6 +16,10 @@ class AiAssistantService(
 
     fun handleMessage(update: TelegramUpdate): Mono<Unit> {
 
+        if(update.message == null || update.message.text == null) {
+            return Mono.empty()
+        }
+
         log.debug("update.message?.text!! ${update.message?.text!!}")
 
         return openAIService.chatWithGPT(update.message.text).flatMap {
