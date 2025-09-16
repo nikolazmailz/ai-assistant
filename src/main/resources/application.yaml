@@ -22,7 +22,6 @@ spring:
 #    default-property-inclusion: non_null
 #    serialization:
 #      write-dates-as-timestamps: false
-
   # --- R2DBC: основное (reactive) подключение ---
   r2dbc:
     url: ${R2DBC_URL:r2dbc:postgresql://postgres:5432/ai_assistant}

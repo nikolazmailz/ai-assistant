@@ -156,7 +156,8 @@ EOF
 ```
 
 ### Сборка и запуск
-```
+```bash 
+
 docker compose build
 docker compose up -d
 docker compose ps
@@ -165,7 +166,8 @@ curl -k https://<IP>/healthz
 ```
 
 ### Установка вебхука c загрузкой сертификата
-```
+```bash
+
 curl -s -X POST "https://api.telegram.org/bot${TG_BOT_TOKEN}/deleteWebhook"
 
 curl -s "https://api.telegram.org/bot${TG_BOT_TOKEN}/getWebhookInfo"
