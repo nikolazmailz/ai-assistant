@@ -247,6 +247,13 @@ docker rm -f postgres16
 docker volume rm pgdata
 docker volume create pgdata
 
+
+docker network ls
+docker volume ls 
+docker volume rm pgdata
+docker network rm ai-assistant_default
+
+
 ```
 
 ### Проверка статуса контейнера 
