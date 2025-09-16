@@ -23,6 +23,26 @@ spring:
 #    serialization:
 #      write-dates-as-timestamps: false
 
+  # --- R2DBC: основное (reactive) подключение ---
+  r2dbc:
+    url: ${R2DBC_URL:r2dbc:postgresql://postgres:5432/ai_assistant}
+    username: ${POSTGRES_USER:}
+    password: ${POSTGRES_PASSWORD:}
+#    pool:
+#      # включай, только если добавишь зависимость r2dbc-pool (см. ниже)
+#      enabled: ${R2DBC_POOL_ENABLED:false}
+#      initial-size: ${R2DBC_POOL_INITIAL_SIZE:2}
+#      max-size: ${R2DBC_POOL_MAX_SIZE:10}
+#      max-idle-time: ${R2DBC_POOL_MAX_IDLE:30s}
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    url: ${JDBC_URL:jdbc:postgresql://postgres:5432/ai_assistant}
+    user: ${POSTGRES_USER:}
+    password: ${POSTGRES_PASSWORD:}
+
+
 # ======= Management / Actuator =======
 management:
   server:
@@ -36,27 +56,18 @@ management:
 #      show-details: when_authorized
       probes:
         enabled: true
-#      group:
-#        readiness:
-#          include: readinessState
-#        liveness:
-#          include: livenessState
+      group:
+        readiness:
+          include: r2dbc, liquibase # readinessState
+        liveness:
+          include: ping # livenessState
 #  health:
 #    defaults:
 #      enabled: true
 
-# ======= Logging =======
-logging:
-  level:
-    ru.ai: DEBUG
-    root: INFO
-    org.springframework.web: INFO
-    reactor.netty.http.client: WARN
-    reactor.netty.http.server: WARN
 
 # ======= App placeholders (на будущее) =======
 app:
-  timezone: Europe/Moscow
   telegram:
     bot-token: ${TG_BOT_TOKEN:}
     webhook-secret: ${TG_WEBHOOK_SECRET:}
@@ -67,3 +78,16 @@ app:
     port: ${PROXY_PORT:}
     user: ${PROXY_USER:}
     password: ${PROXY_PASSWORD:}
+
+  timezone: Europe/Moscow
+
+
+
+# ======= Logging =======
+logging:
+  level:
+    ru.ai: DEBUG
+    root: INFO
+    org.springframework.web: INFO
+    reactor.netty.http.client: WARN
+    reactor.netty.http.server: WARN

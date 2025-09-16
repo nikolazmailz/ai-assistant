@@ -33,6 +33,16 @@ dependencies {
 //    implementation("org.springframework.boot:spring-boot-starter-logging")
     implementation("io.github.oshai:kotlin-logging-jvm:5.1.0")
 
+    // Драйвер PostgreSQL для R2DBC
+    implementation("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
+    // R2DBC (runtime доступ к БД)
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+
+    // Liquibase (миграции) — работает через JDBC
+    implementation("org.liquibase:liquibase-core")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    runtimeOnly("org.postgresql:postgresql")
+
     // Тесты
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")

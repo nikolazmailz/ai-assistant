@@ -178,6 +178,9 @@ curl -s -F "url=https://79.143.31.222/tg/webhook" \
 
 curl -s "https://api.telegram.org/bot${TG_BOT_TOKEN}/getWebhookInfo"
 
+docker logs --tail 200 ai-assistant-app
+docker logs --tail 200 ai-assistant-nginx
+
 ```
 
 
@@ -189,4 +192,64 @@ curl -s "https://api.telegram.org/bot${TG_BOT_TOKEN}/getWebhookInfo"
 curl -sS -X POST "https://api.telegram.org/bot$TG_BOT_TOKEN/sendMessage" \
   -H "Content-Type: application/json" \
   -d '{"chat_id": <CHAT_ID>, "text": "ping", "parse_mode": "HTML"}'
+```
+
+
+
+## БД
+
+### Создать изолированную сеть
+
+```bash
+
+docker network create app-net
+# 51bb17b7d0ba3d6ef4d9b43b1cc4956e8009cdfe1704340869fb5a583e8f3d3f
+docker network ls | grep app-net
+
+```
+
+### Создать тома для данных и бэкапов
+
+```bash
+
+docker volume create pgdata
+docker volume create pgbackups
+docker volume ls | grep pg
+
+```
+
+### Подготовить файл с секретами (в домашней/рабочей директории)
+
+```bash
+
+cd /opt/ai-assistant
+printf "POSTGRES_USER=app\nPOSTGRES_PASSWORD=СЛОЖНЫЙ_ПАРОЛЬ\nPOSTGRES_DB=ai_assistant\nTZ=Europe/Moscow\n" > .env
+chmod 600 .env
+source .env
+```
+
+### Запустить PostgreSQL 16 в app-net без публикации порта
+```bash
+
+docker run -d --name postgres16 \
+  --env-file /opt/ai-assistant/.env \
+  --network app-net \
+  -v pgdata:/var/lib/postgresql/data \
+  -v pgbackups:/backups \
+  -e POSTGRES_INITDB_ARGS="--encoding=UTF8 --locale-provider=icu --icu-locale=ru-RU" \
+  --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB || exit 1" \
+  --health-interval=10s --health-timeout=5s --health-retries=5 \
+  postgres:16
+
+docker rm -f postgres16
+docker volume rm pgdata
+docker volume create pgdata
+
+```
+
+### Проверка статуса контейнера 
+```bash
+
+docker ps --filter "name=postgres16"
+docker logs -f postgres16 | sed -n '1,200p'
 ```
