@@ -235,13 +235,15 @@ source .env
 
 docker run -d --name postgres16 \
   --env-file /opt/ai-assistant/.env \
-  --network app-net \
+  --network ai-assistant_app-net \
   -v pgdata:/var/lib/postgresql/data \
   -v pgbackups:/backups \
   -e POSTGRES_INITDB_ARGS="--encoding=UTF8 --locale-provider=icu --icu-locale=ru-RU" \
   --health-cmd="pg_isready -U $POSTGRES_USER -d $POSTGRES_DB || exit 1" \
   --health-interval=10s --health-timeout=5s --health-retries=5 \
   postgres:16
+  
+docker logs --tail 100 postgres16
 
 docker rm -f postgres16
 docker volume rm pgdata
