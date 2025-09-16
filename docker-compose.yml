@@ -21,6 +21,8 @@ services:
     restart: unless-stopped
     expose:
       - "8080"
+    networks:
+      - app-net
 
   nginx:
     image: nginx:1.27-alpine
