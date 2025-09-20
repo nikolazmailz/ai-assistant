@@ -57,7 +57,7 @@ management:
         enabled: true
       group:
         readiness:
-          include: r2dbc, liquibase # readinessState
+          include: r2dbc # readinessState
         liveness:
           include: ping # livenessState
 #  health:
