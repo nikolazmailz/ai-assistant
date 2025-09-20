@@ -1,0 +1,38 @@
+# ======= Server =======
+server:
+  port: 8080
+
+
+spring:
+  application:
+    name: ai-assistant
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/testdb
+    username: postgresql
+    password: postgresql
+
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+
+# ======= Management / Actuator =======
+management:
+  server:
+    port: 8080
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+
+# ======= Logging =======
+logging:
+  level:
+    ru.ai: DEBUG
+    root: INFO
+    org.springframework.web: INFO
+    reactor.netty.http.client: WARN
+    reactor.netty.http.server: WARN
