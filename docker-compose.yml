@@ -9,8 +9,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       TZ: ${TZ}
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      - pgbackups:/backups
+      - /opt/postgres/data:/var/lib/postgresql/data
+      - /opt/postgres/backups:/backups
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} || exit 1"]
       interval: 10s
@@ -21,6 +21,9 @@ services:
   app:
     build: .
     container_name: ai-assistant-app
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       TZ: ${TZ}
       TG_BOT_TOKEN: ${TG_BOT_TOKEN}
@@ -56,5 +59,5 @@ services:
 
 networks:
   app-net:
-    external: true
-    name: ai-assistant_app-net
+    name: app-net
+
