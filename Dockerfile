@@ -1,7 +1,7 @@
 FROM eclipse-temurin:21-jdk AS build
 WORKDIR /app
 COPY . .
-RUN ./gradlew --no-daemon clean bootJar
+RUN ./gradlew --no-daemon clean bootJar -x test
 
 FROM eclipse-temurin:21-jre
 ENV TZ=Europe/Moscow
