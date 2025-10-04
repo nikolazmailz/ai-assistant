@@ -58,10 +58,12 @@ class AiAssistantService(
 
             val answerAI: AnswerAI = objectMapper.readValue<AnswerAI>(it)
 
-            mono {
-                val rawSqlServiceResult = rawSqlService.execute(answerAI.sql)
-                log.debug("rawSqlServiceResult $rawSqlServiceResult")
-            }.subscribe()
+            if(answerAI.sql != null){
+                mono {
+                    val rawSqlServiceResult = rawSqlService.execute(answerAI.sql)
+                    log.debug("rawSqlServiceResult $rawSqlServiceResult")
+                }.subscribe()
+            }
 
             telegramClient.sendMessage(
                 update.message.chat.id, it
