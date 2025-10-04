@@ -13,7 +13,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import ru.ai.assistant.api.TelegramWebhookController
-import ru.ai.assistant.application.AiAssistantService
+import ru.ai.assistant.application.AiAssistantHandler
 import ru.ai.assistant.infra.openapi.OpenAIServiceImpl
 
 @SpringBootTest(
@@ -30,7 +30,7 @@ import ru.ai.assistant.infra.openapi.OpenAIServiceImpl
 @MockkBeans(
     MockkBean(TelegramWebhookController::class),
 //    MockkBean(OpenAIWebClientConfig::class),
-    MockkBean(AiAssistantService::class),
+    MockkBean(AiAssistantHandler::class),
     MockkBean(OpenAIServiceImpl::class),
 )
 abstract class BaseIT(body: ShouldSpec.() -> Unit = {}) : ShouldSpec(body) {

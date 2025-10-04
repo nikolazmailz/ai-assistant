@@ -8,6 +8,7 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import ru.ai.assistant.application.OpenAIService
 import ru.ai.assistant.infra.openapi.dto.ChatCompletionResponse
+import java.time.LocalDateTime
 
 @Service
 class OpenAIServiceImpl(
@@ -42,6 +43,7 @@ class OpenAIServiceImpl(
 //            "model" to "gpt-4o-mini",
             "model" to "gpt-3.5-turbo",
             "messages" to listOf(
+                mapOf("role" to "system", "content" to LocalDateTime.now()),
                 mapOf("role" to "system", "content" to systemPrompt),
                 mapOf("role" to "user", "content" to prompt)
             )

@@ -1,12 +1,13 @@
 package ru.ai.assistant.api
 
+import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
-import ru.ai.assistant.application.AiAssistantService
+import ru.ai.assistant.application.AiAssistantHandler
 import ru.ai.assistant.domain.TelegramUpdate
-import ru.ai.assistant.infra.TelegramClient
 
 /**
  * Заглушка: принимает апдейты Telegram и пишет их в лог.
@@ -14,7 +15,7 @@ import ru.ai.assistant.infra.TelegramClient
 @RestController
 @RequestMapping("/tg")
 class TelegramWebhookController(
-    private val aiAssistantService: AiAssistantService
+    private val aiAssistantHandler: AiAssistantHandler
 //    private val telegramClient: TelegramClient
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
@@ -23,6 +24,19 @@ class TelegramWebhookController(
     fun onUpdate(@RequestBody update: TelegramUpdate): Mono<ResponseEntity<Void>> {
         log.info("Got update: {}", update)
 //        telegramClient.sendMessage(update.message?.chat?.id!!, "Hi").subscribe()
-        return aiAssistantService.handleMessage(update).thenReturn(ResponseEntity.ok().build())
+        return mono {
+            aiAssistantHandler.handleMessage(update)
+            ResponseEntity.ok().build<Void>()
+        }
     }
 }
+
+
+//️ Если handleMessage не должен блокировать ответ
+//
+//Если ты хочешь асинхронно обработать сообщение и сразу ответить Telegram 200 OK, то лучше не ждать завершения handleMessage:
+
+
+//Ждать выполнения обработки	mono { aiAssistantHandler.handleMessage(update) }
+//Ответить сразу (fire-and-forget)	Mono.fromRunnable { runBlocking { ... } }.subscribe()
+
