@@ -15,7 +15,7 @@ import java.time.OffsetDateTime
 
 @Service
 class AiAssistantService(
-    private val openAIService: OpenAIService,
+    private val LLMService: LLMService,
     private val telegramClient: TelegramClient,
     private val objectMapper: ObjectMapper,
     private val testMsgRepository: TestMsgRepository,
@@ -24,10 +24,10 @@ class AiAssistantService(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    fun handleMessage(update: TelegramUpdate): Mono<Unit> {
+    suspend fun handleMessage(update: TelegramUpdate) {
 
         if(update.message == null || update.message.text == null) {
-            return Mono.empty()
+            return
         }
 
         log.debug("update.message?.text!! ${update.message?.text!!}")
@@ -43,30 +43,30 @@ class AiAssistantService(
             )
         }.subscribe()
 
-        return openAIService.chatWithGPT(update.message.text).flatMap {
-
-            mono {
-                testMsgRepository.save(
-                    TestMsg(
-                        chatId = update.message.message_id,
-                        userId = update.message.from?.id!!,
-                        text = it,
-                        createdAt = OffsetDateTime.now(),
-                    )
-                )
-            }.subscribe()
-
-            val answerAI: AnswerAI = objectMapper.readValue<AnswerAI>(it)
-
-            mono {
-                val rawSqlServiceResult = rawSqlService.execute(answerAI.sql)
-                log.debug("rawSqlServiceResult $rawSqlServiceResult")
-            }.subscribe()
-
-            telegramClient.sendMessage(
-                update.message.chat.id, it
-            )
-
-        }
+//        LLMService.chatWithGPT(update.message.text).map {
+//
+//            mono {
+//                testMsgRepository.save(
+//                    TestMsg(
+//                        chatId = update.message.message_id,
+//                        userId = update.message.from?.id!!,
+//                        text = it,
+//                        createdAt = OffsetDateTime.now(),
+//                    )
+//                )
+//            }.subscribe()
+//
+//            val answerAI: AnswerAI = objectMapper.readValue<AnswerAI>(it)
+//
+//            mono {
+//                val rawSqlServiceResult = rawSqlService.execute(answerAI.sql)
+//                log.debug("rawSqlServiceResult $rawSqlServiceResult")
+//            }.subscribe()
+//
+//            telegramClient.sendMessage(
+//                update.message.chat.id, it
+//            )
+//
+//        }
     }
 }

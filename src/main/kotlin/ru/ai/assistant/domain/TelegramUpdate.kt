@@ -6,7 +6,7 @@ package ru.ai.assistant.domain
  */
 data class TelegramUpdate(
     val update_id: Long,
-    val message: TelegramMessage?
+    val message: TelegramMessage?,
 )
 
 data class TelegramMessage(

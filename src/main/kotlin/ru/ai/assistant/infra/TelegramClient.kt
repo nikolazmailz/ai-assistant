@@ -7,12 +7,13 @@ import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import ru.ai.assistant.application.InterfaceClient
 
 @Component
 class TelegramClient(
     @Value("\${app.telegram.bot-token}") private val botToken: String,
     builder: WebClient.Builder
-) {
+): InterfaceClient {
     private val log = LoggerFactory.getLogger(javaClass)
 
     private val client = builder
@@ -40,10 +41,10 @@ class TelegramClient(
         val description: String? = null
     )
 
-    fun sendMessage(
+    override fun sendMessage(
         chatId: Long,
         text: String,
-        parseMode: ParseMode? = null
+        parseMode: ParseMode?
     ): Mono<Unit> {
         log.info("")
         require(chatId > 0) { "chatId must be > 0" }

@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
 import ru.ai.assistant.application.AiAssistantService
 import ru.ai.assistant.domain.TelegramUpdate
-import ru.ai.assistant.infra.TelegramClient
 
 /**
  * Заглушка: принимает апдейты Telegram и пишет их в лог.
@@ -20,9 +19,10 @@ class TelegramWebhookController(
     private val log = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/webhook")
-    fun onUpdate(@RequestBody update: TelegramUpdate): Mono<ResponseEntity<Void>> {
+    suspend fun onUpdate(@RequestBody update: TelegramUpdate): ResponseEntity<Void> {
         log.info("Got update: {}", update)
 //        telegramClient.sendMessage(update.message?.chat?.id!!, "Hi").subscribe()
-        return aiAssistantService.handleMessage(update).thenReturn(ResponseEntity.ok().build())
+        aiAssistantService.handleMessage(update)
+        return ResponseEntity.ok().build()
     }
 }
