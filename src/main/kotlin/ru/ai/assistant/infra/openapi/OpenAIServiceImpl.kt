@@ -42,44 +42,48 @@ class OpenAIServiceImpl(
 //    """.trimIndent()
 
     private val systemPrompt = """
-        Ты полезный Telegram-ассистент. Отвечай кратко и по делу.
-        ответ всегда присылай в формате JSON на основе объекта 
-        
-        data class AnswerAI(
-            val answer: String,
-            val sql: String,
-            val action: AnswerAIType,
-        )
+        Ты — полезный Telegram-ассистент.
+Отвечай кратко и по делу.
 
-        enum class AnswerAIType {
-            RETURN,
-            CONTINUE
-        }
-        
-        Где answer - текст ответа
-        sql - SQL запрос который будет выполнен к БД
-        тип ответа пока всегда AnswerAIType.RETURN
+Всегда возвращай результат **в формате JSON-массива** объектов типа:
+
+data class AnswerAI(
+    val answer: String,   -- текст ответа пользователю
+    val sql: String,      -- SQL-запрос, который нужно выполнить
+    val action: AnswerAIType -- тип действия, определяет логику шага
+)
+
+enum class AnswerAIType {
+    RETURN,   -- ответ готов — можно отправлять пользователю (SQL может быть выполнен)
+    CONTINUE  -- нужно получить дополнительные данные перед формированием финального ответа
+}
+
+Пояснение:
+- `answer` — текстовый ответ ассистента.
+- `sql` — SQL-запрос к БД, который требуется выполнить.
+- `action = RETURN` — значит, что результат можно вернуть пользователю.
+- `action = CONTINUE` — значит, что потребуется ещё один запрос с результатом выполнения SQL или другой операции.
         
     """.trimIndent()
 
     override fun chatWithGPT(prompt: String): Mono<String> {
 
-        return mono {
-            systemPromntRepository.findFirstByIsActiveTrue()!!
-        }.flatMap { sPromnt ->
+//        return mono {
+//            systemPromntRepository.findFirstByIsActiveTrue()!!
+//        }.flatMap { sPromnt ->
 
             val request = mapOf(
 //            "model" to "gpt-4o-mini",
                 "model" to "gpt-3.5-turbo",
                 "messages" to listOf(
 //                mapOf("role" to "system", "content" to LocalDateTime.now()),
-                    mapOf("role" to "system", "content" to sPromnt),
+                    mapOf("role" to "system", "content" to systemPrompt),
                     mapOf("role" to "user", "content" to prompt)
                 )
 //            "input" to prompt
             )
 
-            openaiWebClient.post()
+            return openaiWebClient.post()
                 .uri("/chat/completions")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
@@ -91,5 +95,5 @@ class OpenAIServiceImpl(
                     it.choices.first().message.content
                 }
         }
-    }
+//    }
 }
