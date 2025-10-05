@@ -4,5 +4,5 @@ import reactor.core.publisher.Mono
 
 interface OpenAIService {
 
-    fun chatWithGPT(prompt: String): Mono<String>
+    fun chatWithGPT(prompt: String, knowledge: String): Mono<String>
 }

@@ -1,8 +1,6 @@
 package ru.ai.assistant.infra.openapi
 
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.reactor.mono
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
@@ -10,7 +8,6 @@ import reactor.core.publisher.Mono
 import ru.ai.assistant.application.OpenAIService
 import ru.ai.assistant.domain.systemprompt.SystemPromntRepository
 import ru.ai.assistant.infra.openapi.dto.ChatCompletionResponse
-import java.time.LocalDateTime
 
 @Service
 class OpenAIServiceImpl(
@@ -81,36 +78,40 @@ enum class AnswerAIType {
 - `action = CONTINUE` — значит, что потребуется ещё один запрос с результатом выполнения SQL или другой операции.
 - `order` — порядок обработки сообщения   
 
+Твои знания: 
+
     """.trimIndent()
 
-    override fun chatWithGPT(prompt: String): Mono<String> {
+    override fun chatWithGPT(prompt: String, knowledge: String): Mono<String> {
 
 //        return mono {
 //            systemPromntRepository.findFirstByIsActiveTrue()!!
 //        }.flatMap { sPromnt ->
 
-            val request = mapOf(
+        val request = mapOf(
 //            "model" to "gpt-4o-mini",
-                "model" to "gpt-3.5-turbo",
-                "messages" to listOf(
+            "model" to "gpt-3.5-turbo",
+            "messages" to listOf(
 //                mapOf("role" to "system", "content" to LocalDateTime.now()),
-                    mapOf("role" to "system", "content" to systemPrompt),
-                    mapOf("role" to "user", "content" to prompt)
-                )
-//            "input" to prompt
+                mapOf("role" to "system", "content" to "$systemPrompt $knowledge"),
+                mapOf("role" to "user", "content" to prompt)
             )
+//            "input" to prompt
+        )
 
-            return openaiWebClient.post()
-                .uri("/chat/completions")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(request)
-                .retrieve()
-                .bodyToMono(ChatCompletionResponse::class.java)
-                .doOnNext { log.info { "Ответ OpenAI: $it" } }
-                .doOnError { t -> log.error(t) { "Ошибка при запросе к OpenAI" } }
-                .map {
-                    it.choices.first().message.content
-                }
-        }
+        log.debug { "chatWithGPT request $request" }
+
+        return openaiWebClient.post()
+            .uri("/chat/completions")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(ChatCompletionResponse::class.java)
+            .doOnNext { log.info { "Ответ OpenAI: $it" } }
+            .doOnError { t -> log.error(t) { "Ошибка при запросе к OpenAI" } }
+            .map {
+                it.choices.first().message.content
+            }
+    }
 //    }
 }

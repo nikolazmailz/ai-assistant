@@ -6,12 +6,19 @@ import org.springframework.stereotype.Service
 import ru.ai.assistant.domain.ConversationQueueEntity
 import com.fasterxml.jackson.core.type.TypeReference
 import io.github.oshai.kotlinlogging.KotlinLogging
+import ru.ai.assistant.db.RawSqlService
+import ru.ai.assistant.db.SqlScript
+import ru.ai.assistant.domain.audit.AuditLogEntity
+import ru.ai.assistant.domain.audit.AuditLogRepository
+import ru.ai.assistant.domain.audit.PayloadTypeLog
 import ru.ai.assistant.infra.TelegramClient
 
 @Service
 class ConversionService(
     private val openAIService: OpenAIService,
     private val telegramClient: TelegramClient,
+    private val auditLogRepository: AuditLogRepository,
+    private val rawSqlService: RawSqlService,
 ) {
 
     private val log = KotlinLogging.logger {}
@@ -31,7 +38,24 @@ class ConversionService(
          * 2к - Что-то сделать и сделать новую запись в ConversationQueueRepository
          *
          * */
-        val response = openAIService.chatWithGPT(item.payload!!).awaitSingleOrNull()
+
+        val knowledge = rawSqlService.execute(SqlScript.QUERY_ALL_DATA)
+
+        log.debug { "Get knowledge $knowledge" }
+
+        val response = openAIService.chatWithGPT(item.payload!!, knowledge.first().values.first() as String).awaitSingleOrNull()
+
+        auditLogRepository.save(
+            AuditLogEntity(
+                userId = item.userId,
+                chatId = item.chatId,
+//                sessionId = sessionId,
+                source = "AI",
+                payloadTypeLog = PayloadTypeLog.TEXT,
+                payload = response
+                // id/createdAt/updatedAt — оставляем на DEFAULT в БД
+            )
+        )
 
         val answers: List<AnswerAI> = jacksonObjectMapper().readValue(
             response,

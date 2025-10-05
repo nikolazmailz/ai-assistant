@@ -44,7 +44,7 @@ class AiAssistantHandler (
                 userId = message.from?.id!!,
                 chatId = message.chat.id,
 //                sessionId = sessionId,
-                source = "telegram",
+                source = "user",
                 payloadTypeLog = PayloadTypeLog.TEXT,
                 payload = text
                 // id/createdAt/updatedAt — оставляем на DEFAULT в БД

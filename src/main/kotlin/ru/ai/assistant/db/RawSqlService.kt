@@ -9,7 +9,7 @@ class RawSqlService(
     private val template: R2dbcEntityTemplate
 ) {
 
-    suspend fun     execute(sql: String): List<Map<String, Any?>> {
+    suspend fun execute(sql: String): List<Map<String, Any?>> {
         return template.databaseClient
             .sql(sql)
             .map { row, meta ->
