@@ -4,6 +4,7 @@ data class AnswerAI(
     val answer: String,
     val sql: String? = null,
     val action: AnswerAIType,
+    val order: Long
 ) {
 }
 

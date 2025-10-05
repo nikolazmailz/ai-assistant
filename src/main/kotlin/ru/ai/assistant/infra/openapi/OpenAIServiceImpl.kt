@@ -51,19 +51,22 @@ class OpenAIServiceImpl(
 {
     "answer": "",
     "sql": "",
-    "action": ""
+    "action": "",
+    "order": "",
 },
 { // если два шага
     "answer": "",
     "sql": "",
-    "action": ""
+    "action": "",
+    "order": "",
 }
 ]
 
 data class AnswerAI(
     val answer: String,   -- текст ответа пользователю
     val sql: String,      -- SQL-запрос, который нужно выполнить
-    val action: AnswerAIType -- тип действия, определяет логику шага
+    val action: AnswerAIType -- тип действия, определяет логику шага,
+    val order: Long -- порядок ответа
 )
 
 enum class AnswerAIType {
@@ -76,7 +79,8 @@ enum class AnswerAIType {
 - `sql` — SQL-запрос к БД, который требуется выполнить.
 - `action = RETURN` — значит, что результат можно вернуть пользователю.
 - `action = CONTINUE` — значит, что потребуется ещё один запрос с результатом выполнения SQL или другой операции.
-        
+- `order` — порядок обработки сообщения   
+
     """.trimIndent()
 
     override fun chatWithGPT(prompt: String): Mono<String> {

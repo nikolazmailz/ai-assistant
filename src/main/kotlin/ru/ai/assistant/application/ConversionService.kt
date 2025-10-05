@@ -40,7 +40,7 @@ class ConversionService(
         log.info { "ConversionService answers $answers" }
 
 
-        telegramClient.sendMessage(item.chatId, response!!)
+        telegramClient.sendMessage(item.chatId, response!!).awaitSingleOrNull()
 
     }
 
