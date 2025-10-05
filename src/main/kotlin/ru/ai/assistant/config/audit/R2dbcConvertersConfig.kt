@@ -15,18 +15,18 @@ import ru.ai.assistant.domain.audit.PayloadTypeLog
 class R2dbcConvertersConfig {
 
     @Bean
-    fun payloadTypeReadingConverter(): Converter<String, PayloadTypeLog> = StringToPayloadType
+    fun payloadTypeReadingConverter(): Converter<String, PayloadTypeLog> = StringToPayloadTypeLog
 
     @Bean
-    fun payloadTypeWritingConverter(): Converter<PayloadTypeLog, String> = PayloadTypeToString
+    fun payloadTypeWritingConverter(): Converter<PayloadTypeLog, String> = PayloadTypeLogToString
 }
 
 @ReadingConverter
-object StringToPayloadType : Converter<String, PayloadTypeLog> {
+object StringToPayloadTypeLog : Converter<String, PayloadTypeLog> {
     override fun convert(source: String): PayloadTypeLog = PayloadTypeLog.fromDb(source)
 }
 
 @WritingConverter
-object PayloadTypeToString : Converter<PayloadTypeLog, String> {
+object PayloadTypeLogToString : Converter<PayloadTypeLog, String> {
     override fun convert(source: PayloadTypeLog): String = PayloadTypeLog.toDb(source)
 }
