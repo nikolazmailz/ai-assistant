@@ -41,9 +41,11 @@ class ConversionService(
 
         val knowledge = rawSqlService.execute(SqlScript.QUERY_ALL_DATA)
 
-        log.debug { "Get knowledge $knowledge" }
+        val jsonText = knowledge.first()["tables"] as String
 
-        val response = openAIService.chatWithGPT(item.payload!!, knowledge.first().values.first() as String).awaitSingleOrNull()
+        log.debug { "Get knowledge $jsonText" }
+
+        val response = openAIService.chatWithGPT(item.payload!!, jsonText).awaitSingleOrNull()
 
         auditLogRepository.save(
             AuditLogEntity(
