@@ -3,7 +3,7 @@ package ru.ai.assistant.config.scheduler
 import org.springframework.boot.context.properties.ConfigurationProperties
 import java.time.Duration
 
-@ConfigurationProperties("scheduler")
+@ConfigurationProperties("app.scheduler")
 data class SchedulerProperties(
     var enabled: Boolean = true,
     var poll: Poll = Poll()

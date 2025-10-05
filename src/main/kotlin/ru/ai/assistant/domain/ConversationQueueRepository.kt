@@ -61,28 +61,25 @@ interface ConversationQueueRepository : CoroutineCrudRepository<ConversationQueu
     @Query(
         """
         WITH cte AS (
-            SELECT id
-            FROM conversation_queue
-            WHERE status IN ('new','ready')
-              AND scheduled_at <= now()
+            SELECT id FROM conversation_queue
+            WHERE status = 'NEW' AND scheduled_at <= now()
             ORDER BY scheduled_at ASC
             LIMIT :batch
             FOR UPDATE SKIP LOCKED
         )
             UPDATE conversation_queue q
-            SET status = 'processing', updated_at = now()
+            SET status = 'PROCESSING', updated_at = now()
             WHERE q.id IN (SELECT id FROM cte)
             RETURNING q.*
-
         """
     )
     fun pickBatchForProcessing(batch: Int): Flow<ConversationQueueEntity>
 
     @Modifying
-    @Query("UPDATE conversation_queue SET status = 'success', updated_at = now() WHERE id = :id")
+    @Query("UPDATE conversation_queue SET status = 'SUCCESS', updated_at = now() WHERE id = :id")
     suspend fun markSuccess(id: UUID): Int
 
     @Modifying
-    @Query("UPDATE conversation_queue SET status = 'error',   updated_at = now() WHERE id = :id")
+    @Query("UPDATE conversation_queue SET status = 'ERROR',   updated_at = now() WHERE id = :id")
     suspend fun markError(id: UUID): Int
 }
