@@ -47,6 +47,19 @@ class OpenAIServiceImpl(
 
 Всегда возвращай результат **в формате JSON-массива** объектов типа:
 
+[
+{
+    "answer": "",
+    "sql": "",
+    "action": ""
+},
+{ // если два шага
+    "answer": "",
+    "sql": "",
+    "action": ""
+}
+]
+
 data class AnswerAI(
     val answer: String,   -- текст ответа пользователю
     val sql: String,      -- SQL-запрос, который нужно выполнить
