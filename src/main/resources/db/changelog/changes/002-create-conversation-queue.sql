@@ -4,18 +4,18 @@
 -- Создание таблицы conversation_queue — очередь шагов обработки диалога
 
 -- 1. Enum для направления шага (входящее/исходящее)
-CREATE TYPE direction AS ENUM ('inbound', 'outbound');
+CREATE TYPE direction AS ENUM ('INBOUND', 'OUTBOUND');
 
 -- 2. Enum для роли автора шага
-CREATE TYPE role_type AS ENUM ('user', 'assistant', 'system');
+CREATE TYPE role_type AS ENUM ('USER', 'ASSISTANT', 'SYSTEM');
 
 -- 3. Enum для типа полезной нагрузки
-CREATE TYPE payload_type AS ENUM ('text', 'voice', 'photo', 'document', 'unknown');
+CREATE TYPE payload_type AS ENUM ('TEXT', 'VOICE', 'PHOTO', 'DOCUMENT', 'UNKNOWN');
 
 -- Добавление статуса шага в очередь
-CREATE TYPE queue_status AS ENUM ('new','processing','waiting','ready','success','error');
+CREATE TYPE queue_status AS ENUM ('NEW','PROCESSING','WAITING','READY','SUCCESS','ERROR');
 
-CREATE TYPE step_kind AS ENUM ('request','response','reply_to_ai');
+CREATE TYPE step_kind AS ENUM ('REQUEST','RESPONSE','REPLY_TO_AI');
 
 -- 4. Таблица conversation_queue
 CREATE TABLE conversation_queue (
@@ -23,14 +23,14 @@ CREATE TABLE conversation_queue (
     user_id         BIGINT NOT NULL,                             -- Telegram ID пользователя
     chat_id         BIGINT NOT NULL,                             -- Telegram Chat ID (куда возвращать ответ)
     payload         TEXT,                                        -- содержимое шага (текст или JSON)
-    status          queue_status NOT NULL DEFAULT 'new',         -- Статус шага: new (создан), processing (в работе), waiting (ожидание внешнего события), ready (готов к следующему этапу), success (завершён), error (ошибка).
+    status          TEXT NOT NULL DEFAULT 'NEW',         -- Статус шага: new (создан), processing (в работе), waiting (ожидание внешнего события), ready (готов к следующему этапу), success (завершён), error (ошибка).
     scheduled_at    TIMESTAMPTZ NOT NULL DEFAULT now(),          -- Плановое время выполнения шага (не брать задачу раньше этого момента).
     dialog_id       UUID,                                        -- логическая сессия, объединяющая серию шагов
     source          TEXT NOT NULL DEFAULT 'telegram',            -- источник: telegram / web / api
-    direction       direction NOT NULL DEFAULT 'inbound',        -- направление шага: входящее/исходящее
-    role            role_type NOT NULL DEFAULT 'user',           -- роль автора шага: user / assistant / system
-    payload_type    payload_type NOT NULL DEFAULT 'text',        -- тип полезной нагрузки: text / voice / photo / ...
-    step_kind       step_kind NOT NULL DEFAULT 'request',        -- тип шага: request / response / replyToLLM
+    direction       TEXT NOT NULL DEFAULT 'INBOUND',        -- направление шага: входящее/исходящее
+    role            TEXT NOT NULL DEFAULT 'USER',           -- роль автора шага: user / assistant / system
+    payload_type    TEXT NOT NULL DEFAULT 'TEXT',        -- тип полезной нагрузки: text / voice / photo / ...
+    step_kind       TEXT NOT NULL DEFAULT 'REQUEST',        -- тип шага: request / response / replyToLLM
     next_step_hint  TEXT,                                        -- подсказка о предполагаемом следующем шаге
     action_type     TEXT,                                        -- тип действия: send_reply / fetch_calendar / ...
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),          -- когда шаг создан

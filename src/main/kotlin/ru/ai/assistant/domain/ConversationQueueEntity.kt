@@ -66,4 +66,4 @@ enum class QueueStatus { NEW, PROCESSING, WAITING, READY, SUCCESS, ERROR }
 enum class Direction { INBOUND, OUTBOUND }
 enum class RoleType { USER, ASSISTANT, SYSTEM }
 enum class PayloadType { TEXT, VOICE, PHOTO, DOCUMENT, UNKNOWN }
-enum class StepKind { REQUEST, REPLY_TO_AI}
+enum class StepKind { REQUEST, RESPONSE, REPLY_TO_AI}

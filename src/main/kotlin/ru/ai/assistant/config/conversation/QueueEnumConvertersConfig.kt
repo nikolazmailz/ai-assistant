@@ -13,17 +13,17 @@ import ru.ai.assistant.domain.RoleType
 @Configuration
 class QueueEnumConvertersConfig {
 
-    @Bean fun queueStatusRead(): Converter<String, QueueStatus> = StringToQueueStatus
-    @Bean fun queueStatusWrite(): Converter<QueueStatus, String> = QueueStatusToString
-
-    @Bean fun directionRead(): Converter<String, Direction> = StringToDirection
-    @Bean fun directionWrite(): Converter<Direction, String> = DirectionToString
-
-    @Bean fun roleTypeRead(): Converter<String, RoleType> = StringToRoleType
-    @Bean fun roleTypeWrite(): Converter<RoleType, String> = RoleTypeToString
-
-    @Bean fun payloadTypeRead(): Converter<String, PayloadType> = StringToPayloadType
-    @Bean fun payloadTypeWrite(): Converter<PayloadType, String> = PayloadTypeToString
+//    @Bean fun queueStatusRead(): Converter<String, QueueStatus> = StringToQueueStatus
+//    @Bean fun queueStatusWrite(): Converter<QueueStatus, String> = QueueStatusToString
+//
+//    @Bean fun directionRead(): Converter<String, Direction> = StringToDirection
+//    @Bean fun directionWrite(): Converter<Direction, String> = DirectionToString
+//
+//    @Bean fun roleTypeRead(): Converter<String, RoleType> = StringToRoleType
+//    @Bean fun roleTypeWrite(): Converter<RoleType, String> = RoleTypeToString
+//
+//    @Bean fun payloadTypeRead(): Converter<String, PayloadType> = StringToPayloadType
+//    @Bean fun payloadTypeWrite(): Converter<PayloadType, String> = PayloadTypeToString
 }
 
 @ReadingConverter object StringToQueueStatus : Converter<String, QueueStatus> {

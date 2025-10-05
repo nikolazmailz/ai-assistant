@@ -4,19 +4,19 @@
 -- Создание таблицы аудита взаимодействий (лог запросов/ответов)
 
 -- 1. Enum для типа полезной нагрузки
-CREATE TYPE payload_type_log AS ENUM ('text', 'voice', 'photo', 'document', 'unknown');
+CREATE TYPE payload_type_log AS ENUM ('TEXT', 'VOICE', 'PHOTO', 'DOCUMENT', 'UNKNOWN');
 
 -- 2. Таблица audit_log
 CREATE TABLE audit_log (
-    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),  -- уникальный идентификатор записи
-    user_id       BIGINT NOT NULL,                             -- Telegram ID пользователя
-    chat_id       BIGINT NOT NULL,                             -- Telegram Chat ID (идентификатор чата)
-    session_id    UUID,                                         -- идентификатор сессии/цепочки диалога
-    source        TEXT NOT NULL DEFAULT 'telegram',             -- источник (telegram, web, api и т.п.)
-    payload_type_log  payload_type_log NOT NULL DEFAULT 'text',         -- тип полезной нагрузки
-    payload       TEXT,                                         -- тело запроса или ответа (в зависимости от шага)
-    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),           -- время создания записи
-    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()            -- время последнего обновления
+    id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),  -- уникальный идентификатор записи
+    user_id           BIGINT NOT NULL,                             -- Telegram ID пользователя
+    chat_id           BIGINT NOT NULL,                             -- Telegram Chat ID (идентификатор чата)
+    session_id        UUID,                                         -- идентификатор сессии/цепочки диалога
+    source            TEXT NOT NULL DEFAULT 'telegram',             -- источник (telegram, web, api и т.п.)
+    payload_type_log  TEXT NOT NULL DEFAULT 'TEXT',         -- тип полезной нагрузки
+    payload           TEXT,                                         -- тело запроса или ответа (в зависимости от шага)
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),           -- время создания записи
+    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()            -- время последнего обновления
 );
 
 -- 3. Комментарии к таблице и колонкам

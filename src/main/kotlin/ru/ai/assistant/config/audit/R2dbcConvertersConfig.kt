@@ -14,11 +14,11 @@ import ru.ai.assistant.domain.audit.PayloadTypeLog
 @Configuration
 class R2dbcConvertersConfig {
 
-    @Bean
-    fun payloadTypeReadingConverter(): Converter<String, PayloadTypeLog> = StringToPayloadTypeLog
-
-    @Bean
-    fun payloadTypeWritingConverter(): Converter<PayloadTypeLog, String> = PayloadTypeLogToString
+//    @Bean
+//    fun payloadTypeReadingConverter(): Converter<String, PayloadTypeLog> = StringToPayloadTypeLog
+//
+//    @Bean
+//    fun payloadTypeWritingConverter(): Converter<PayloadTypeLog, String> = PayloadTypeLogToString
 }
 
 @ReadingConverter
