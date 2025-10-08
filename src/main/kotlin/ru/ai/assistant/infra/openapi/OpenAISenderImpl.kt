@@ -39,6 +39,9 @@ class OpenAISenderImpl(
 //    """.trimIndent()
 
     private val systemPrompt = """
+        
+        ЗАПРЩЕННЫЕ СЛОВА (TRUNCATE, DROP, DELETE)
+        
         Ты — полезный Telegram-ассистент.
         Отвечай кратко и по делу.
 
