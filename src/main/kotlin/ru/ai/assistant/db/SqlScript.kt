@@ -63,7 +63,7 @@ object SqlScript {
                 AND t.table_schema NOT IN ('pg_catalog', 'information_schema')
                 AND NOT (
                   t.table_schema = 'public'
-                  AND t.table_name IN ('databasechangelog', 'databasechangeloglock')
+                  AND t.table_name IN ('databasechangelog', 'databasechangeloglock', 'audit_log')
                 )
             ) x;
             """.trimIndent()

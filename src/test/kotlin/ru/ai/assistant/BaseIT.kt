@@ -14,7 +14,7 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import ru.ai.assistant.api.TelegramWebhookController
 import ru.ai.assistant.application.AiAssistantHandler
-import ru.ai.assistant.infra.openapi.OpenAIServiceImpl
+import ru.ai.assistant.infra.openapi.OpenAISenderImpl
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
@@ -31,7 +31,7 @@ import ru.ai.assistant.infra.openapi.OpenAIServiceImpl
     MockkBean(TelegramWebhookController::class),
 //    MockkBean(OpenAIWebClientConfig::class),
     MockkBean(AiAssistantHandler::class),
-    MockkBean(OpenAIServiceImpl::class),
+    MockkBean(OpenAISenderImpl::class),
 )
 abstract class BaseIT(body: ShouldSpec.() -> Unit = {}) : ShouldSpec(body) {
 

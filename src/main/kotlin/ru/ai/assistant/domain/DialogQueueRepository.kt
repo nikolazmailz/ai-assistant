@@ -6,10 +6,10 @@ import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
 import java.util.UUID
 
-interface ConversationQueueRepository : CoroutineCrudRepository<ConversationQueueEntity, UUID> {
+interface DialogQueueRepository : CoroutineCrudRepository<DialogQueue, UUID> {
 
-    fun findAllByDialogIdOrderByCreatedAtAsc(dialogId: UUID): Flow<ConversationQueueEntity>
-    fun findAllByChatIdOrderByCreatedAtAsc(chatId: Long): Flow<ConversationQueueEntity>
+    fun findAllByDialogIdOrderByCreatedAtAsc(dialogId: UUID): Flow<DialogQueue>
+    fun findAllByChatIdOrderByCreatedAtAsc(chatId: Long): Flow<DialogQueue>
 
     @Query(
         """
@@ -20,7 +20,7 @@ interface ConversationQueueRepository : CoroutineCrudRepository<ConversationQueu
         LIMIT :limit
     """
     )
-    fun findReady(limit: Int): Flow<ConversationQueueEntity>
+    fun findReady(limit: Int): Flow<DialogQueue>
 
     @Modifying
     @Query(
@@ -73,7 +73,7 @@ interface ConversationQueueRepository : CoroutineCrudRepository<ConversationQueu
             RETURNING q.*
         """
     )
-    fun pickBatchForProcessing(batch: Int): Flow<ConversationQueueEntity>
+    fun pickBatchForProcessing(batch: Int): Flow<DialogQueue>
 
     @Modifying
     @Query("UPDATE conversation_queue SET status = 'SUCCESS', updated_at = now() WHERE id = :id")

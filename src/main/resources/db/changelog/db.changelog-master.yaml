@@ -7,3 +7,7 @@ databaseChangeLog:
       file: db/changelog/changes/003-create-system-promnt.sql
   - include:
       file: db/changelog/changes/004-first-system-promnt.sql
+  - include:
+      file: db/changelog/changes/005-create-dialog-metainfo.sql
+  - include:
+      file: db/changelog/changes/006-rename-conversation-queue.yaml

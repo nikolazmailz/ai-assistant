@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: rename-conversation-queue
+      author: your_name
+      changes:
+        - renameTable:
+            oldTableName: conversation_queue
+            newTableName: dialog_queue

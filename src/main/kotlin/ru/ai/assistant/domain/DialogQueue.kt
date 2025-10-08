@@ -9,8 +9,8 @@ import java.util.UUID
 /**
  * Очередь шагов обработки диалога. Содержит состояния сообщений и действий, выполняемых по цепочке LLM.
  */
-@Table("conversation_queue")
-data class ConversationQueueEntity(
+@Table("dialog_queue")
+data class DialogQueue(
 
     @Id
     @Column("id")

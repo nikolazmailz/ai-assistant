@@ -5,10 +5,11 @@ import kotlinx.coroutines.flow.toList
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import ru.ai.assistant.application.openai.OpenAISender
 import ru.ai.assistant.application.scheduler.PollResult
 import ru.ai.assistant.db.RawSqlService
-import ru.ai.assistant.domain.ConversationQueueEntity
-import ru.ai.assistant.domain.ConversationQueueRepository
+import ru.ai.assistant.domain.DialogQueue
+import ru.ai.assistant.domain.DialogQueueRepository
 import ru.ai.assistant.domain.Direction
 import ru.ai.assistant.domain.QueueStatus
 import ru.ai.assistant.domain.RoleType
@@ -22,9 +23,9 @@ import java.time.Instant
 @Service
 class AiAssistantHandler (
     private val auditLogRepository: AuditLogRepository,
-    private val conversationQueueRepository: ConversationQueueRepository,
-    private val conversionService: ConversionService,
-    private val openAIService: OpenAIService,
+    private val dialogQueueRepository: DialogQueueRepository,
+    private val dialogService: DialogService,
+    private val openAISender: OpenAISender,
     private val telegramClient: TelegramClient,
     private val objectMapper: ObjectMapper,
     private val rawSqlService: RawSqlService,
@@ -51,8 +52,8 @@ class AiAssistantHandler (
             )
         )
 
-        conversationQueueRepository.save(
-            ConversationQueueEntity(
+        dialogQueueRepository.save(
+            DialogQueue(
                 userId       = message.from.id,
                 chatId       = message.chat.id,
                 payload      = text,
@@ -160,7 +161,7 @@ class AiAssistantHandler (
 
     @Transactional
     suspend fun pollOnce(batchSize: Int): PollResult {
-        val lockedItems = conversationQueueRepository.pickBatchForProcessing(batchSize).toList()
+        val lockedItems = dialogQueueRepository.pickBatchForProcessing(batchSize).toList()
         if (lockedItems.isEmpty()) return PollResult(locked = 0, sent = 0, failed = 0)
 
         var sent = 0
@@ -169,12 +170,12 @@ class AiAssistantHandler (
             val id = requireNotNull(item.id) { "conversation_queue.id must not be null" }
             try {
                 // todo business logic
-                conversionService.handleMsg(item)
-                conversationQueueRepository.markSuccess(id)
+                dialogService.handleMsg(item)
+                dialogQueueRepository.markSuccess(id)
                 sent++
             } catch (t: Throwable) {
                 log.warn("Processing failed for task id={}", id, t)
-                conversationQueueRepository.markError(id)
+                dialogQueueRepository.markError(id)
                 failed++
             }
         }

@@ -17,7 +17,7 @@ class PollingSchedulerBlocking(
 
     @Scheduled(
         initialDelayString = "\${outbox.poll.initialDelay:PT1S}",
-        fixedDelayString = "\${outbox.poll.fixedDelay:PT0.5S}"
+        fixedDelayString = "\${outbox.poll.fixedDelay:PT0.1S}"
     )
     fun tick() = runBlocking {
         if (!props.enabled || !props.poll.enabled) {

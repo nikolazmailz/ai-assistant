@@ -10,5 +10,6 @@ data class AnswerAI(
 
 enum class AnswerAIType {
     RETURN,
-    CONTINUE
+    CONTINUE,
+    REPLY_TO_LLM
 }
