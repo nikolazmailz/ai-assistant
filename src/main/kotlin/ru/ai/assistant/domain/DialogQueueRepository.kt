@@ -13,7 +13,7 @@ interface DialogQueueRepository : CoroutineCrudRepository<DialogQueue, UUID> {
 
     @Query(
         """
-        SELECT * FROM conversation_queue
+        SELECT * FROM dialog_queue
         WHERE status IN ('new','ready')
           AND scheduled_at <= now()
         ORDER BY scheduled_at ASC
@@ -25,7 +25,7 @@ interface DialogQueueRepository : CoroutineCrudRepository<DialogQueue, UUID> {
     @Modifying
     @Query(
         """
-        UPDATE conversation_queue
+        UPDATE dialog_queue
         SET status = CAST(:status AS queue_status),
             updated_at = now()
         WHERE id = :id
@@ -37,7 +37,7 @@ interface DialogQueueRepository : CoroutineCrudRepository<DialogQueue, UUID> {
 //        """
 //        WITH cte AS (
 //            SELECT id
-//            FROM conversation_queue
+//            FROM dialog_queue
 //            WHERE status IN ('new','ready')
 //              AND scheduled_at <= now()
 //            ORDER BY scheduled_at ASC
@@ -45,7 +45,7 @@ interface DialogQueueRepository : CoroutineCrudRepository<DialogQueue, UUID> {
 //            FOR UPDATE SKIP LOCKED
 //        ),
 //        upd AS (
-//            UPDATE conversation_queue q
+//            UPDATE dialog_queue q
 //            SET status = 'processing',
 //                updated_at = now()
 //            WHERE q.id IN (SELECT id FROM cte)
@@ -61,13 +61,13 @@ interface DialogQueueRepository : CoroutineCrudRepository<DialogQueue, UUID> {
     @Query(
         """
         WITH cte AS (
-            SELECT id FROM conversation_queue
+            SELECT id FROM dialog_queue
             WHERE status = 'NEW' AND scheduled_at <= now()
             ORDER BY scheduled_at ASC
             LIMIT :batch
             FOR UPDATE SKIP LOCKED
         )
-            UPDATE conversation_queue q
+            UPDATE dialog_queue q
             SET status = 'PROCESSING', updated_at = now()
             WHERE q.id IN (SELECT id FROM cte)
             RETURNING q.*
@@ -76,10 +76,10 @@ interface DialogQueueRepository : CoroutineCrudRepository<DialogQueue, UUID> {
     fun pickBatchForProcessing(batch: Int): Flow<DialogQueue>
 
     @Modifying
-    @Query("UPDATE conversation_queue SET status = 'SUCCESS', updated_at = now() WHERE id = :id")
+    @Query("UPDATE dialog_queue SET status = 'SUCCESS', updated_at = now() WHERE id = :id")
     suspend fun markSuccess(id: UUID): Int
 
     @Modifying
-    @Query("UPDATE conversation_queue SET status = 'ERROR',   updated_at = now() WHERE id = :id")
+    @Query("UPDATE dialog_queue SET status = 'ERROR',   updated_at = now() WHERE id = :id")
     suspend fun markError(id: UUID): Int
 }

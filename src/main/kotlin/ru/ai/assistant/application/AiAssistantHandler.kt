@@ -167,7 +167,7 @@ class AiAssistantHandler (
         var sent = 0
         var failed = 0
         for (item in lockedItems) {
-            val id = requireNotNull(item.id) { "conversation_queue.id must not be null" }
+            val id = requireNotNull(item.id) { "dialog_queue.id must not be null" }
             try {
                 // todo business logic
                 dialogService.handleMsg(item)
