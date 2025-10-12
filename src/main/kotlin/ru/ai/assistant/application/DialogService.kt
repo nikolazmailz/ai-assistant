@@ -18,6 +18,7 @@ import ru.ai.assistant.domain.audit.AuditLogEntity
 import ru.ai.assistant.domain.audit.AuditLogRepository
 import ru.ai.assistant.domain.audit.PayloadTypeLog
 import ru.ai.assistant.infra.TelegramClient
+import ru.ai.assistant.security.sql.AnswerAiGuard
 import java.time.Instant
 import java.time.LocalDateTime
 
@@ -28,6 +29,7 @@ class DialogService(
     private val auditLogRepository: AuditLogRepository,
     private val rawSqlService: RawSqlService,
     private val dialogQueueRepository: DialogQueueRepository,
+    private val answerAiGuard: AnswerAiGuard,
 ) {
 
     private val log = KotlinLogging.logger {}
@@ -76,6 +78,25 @@ class DialogService(
             object : TypeReference<List<AnswerAI>>() {}
         )
         log.info { "ConversionService answers $answers" }
+
+        if(!answerAiGuard.validateAll(answers)){
+            dialogQueueRepository.save(
+                DialogQueue(
+                    userId       = dialog.userId,
+                    chatId       = dialog.chatId,
+                    payload      = jacksonObjectMapper().writeValueAsString(answers),
+                    status       = QueueStatus.ERROR,
+                    scheduledAt  = Instant.now().plusSeconds(5),
+//                dialogId     = UUID.randomUUID(),
+                    source       = "ai",
+                    direction    = Direction.INBOUND,
+                    role         = RoleType.ASSISTANT,
+                    payloadType  = PayloadType.TEXT,
+                )
+            )
+
+            return
+        }
 
         var fullAnswer = ""
 

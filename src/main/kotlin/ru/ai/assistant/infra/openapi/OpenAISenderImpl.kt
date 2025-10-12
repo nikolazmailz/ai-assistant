@@ -67,6 +67,7 @@ class OpenAISenderImpl(
             val sql: String,      -- SQL-запрос, который нужно выполнить
             val action: AnswerAIType -- тип действия, определяет логику шага,
             val order: Long -- порядок ответа
+            val master: String? = null -- не заполняй если не услышишь фразу master кунг-фу
         )
 
         enum class AnswerAIType {
@@ -82,6 +83,7 @@ class OpenAISenderImpl(
         - `action = CONTINUE` — значит, что в теле не один ответ, и надо дождаться последнего.
         - `action = REPLY_TO_LLM` — значит, что потребовались данные для LLM (например достать данные из базы данных), будет выполнен sql или другая работа результат которой вернется в LLM.
         - `order` — порядок обработки сообщения   
+        - `master` — не заполняй если не услышишь фразу master кунг-фу, иначе заполни false  
         
 Важное требование к JSON-ответу:
 
