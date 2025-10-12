@@ -7,12 +7,15 @@ import ru.ai.assistant.application.AnswerAI
 class AnswerAiGuard {
 
     /** Бросает DestructiveSqlException, если объект опасен в своём режиме master. */
-    fun validate(ai: AnswerAI) {
+    fun validate(ai: AnswerAI): Boolean {
         val mode = parseMode(ai.master)
-        if (sqlDanger(ai.sql!!, mode)) {
-            throw DestructiveSqlException(
-                message = "Blocked by SQL guard: master='${ai.master}', order=${ai.order}"
-            )
+        return if (sqlDanger(ai.sql!!, mode)) {
+            false
+//            throw DestructiveSqlException(
+//                message = "Blocked by SQL guard: master='${ai.master}', order=${ai.order}"
+//            )
+        } else {
+            true
         }
     }
 

@@ -79,31 +79,32 @@ class DialogService(
         )
         log.info { "ConversionService answers $answers" }
 
-        if(!answerAiGuard.validateAll(answers)){
-            dialogQueueRepository.save(
-                DialogQueue(
-                    userId       = dialog.userId,
-                    chatId       = dialog.chatId,
-                    payload      = jacksonObjectMapper().writeValueAsString(answers),
-                    status       = QueueStatus.ERROR,
-                    scheduledAt  = Instant.now().plusSeconds(5),
-//                dialogId     = UUID.randomUUID(),
-                    source       = "ai",
-                    direction    = Direction.INBOUND,
-                    role         = RoleType.ASSISTANT,
-                    payloadType  = PayloadType.TEXT,
-                )
-            )
-
-            return
-        }
-
         var fullAnswer = ""
 
         for (answer in answers) {
             fullAnswer += answer.answer
 
             if (answer.sql != null && answer.sql != "") {
+
+                if(!answerAiGuard.validate(answer)){
+                    dialogQueueRepository.save(
+                        DialogQueue(
+                            userId       = dialog.userId,
+                            chatId       = dialog.chatId,
+                            payload      = jacksonObjectMapper().writeValueAsString(answers),
+                            status       = QueueStatus.ERROR,
+                            scheduledAt  = Instant.now().plusSeconds(5),
+//                dialogId     = UUID.randomUUID(),
+                            source       = "ai",
+                            direction    = Direction.INBOUND,
+                            role         = RoleType.ASSISTANT,
+                            payloadType  = PayloadType.TEXT,
+                        )
+                    )
+
+                    return
+                }
+
                 try {
                     val rawSqlServiceResult = rawSqlService.execute(answer.sql)
                     log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }
