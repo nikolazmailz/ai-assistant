@@ -1,0 +1,2 @@
+ALTER TABLE dialog_metainfo
+ALTER COLUMN title DROP NOT NULL;
