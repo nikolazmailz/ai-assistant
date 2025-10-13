@@ -1,4 +1,4 @@
-package ru.ai.assistant.application.scheduler
+package ru.ai.assistant.application.handler
 
 data class PollResult(
     val locked: Int,

@@ -1,4 +1,4 @@
-package ru.ai.assistant.domain
+package ru.ai.assistant.domain.metainfo
 
 import kotlinx.coroutines.flow.Flow
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository

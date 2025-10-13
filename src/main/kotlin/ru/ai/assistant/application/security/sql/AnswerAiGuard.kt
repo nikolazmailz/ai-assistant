@@ -1,13 +1,14 @@
-package ru.ai.assistant.security.sql
+package ru.ai.assistant.application.security.sql
 
 import org.springframework.stereotype.Component
-import ru.ai.assistant.application.AnswerAI
+import ru.ai.assistant.application.dto.AnswerAI
+import ru.ai.assistant.application.security.sql.dto.Mode
 
 @Component
 class AnswerAiGuard {
 
     /** Бросает DestructiveSqlException, если объект опасен в своём режиме master. */
-    fun validate(ai: AnswerAI): Boolean {
+    fun sqlValidate(ai: AnswerAI): Boolean {
         val mode = parseMode(ai.master)
         return if (sqlDanger(ai.sql!!, mode)) {
             false

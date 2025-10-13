@@ -1,4 +1,4 @@
-package ru.ai.assistant.security.sql
+package ru.ai.assistant.application.security.sql.dto
 
 class DestructiveSqlException(
     message: String,

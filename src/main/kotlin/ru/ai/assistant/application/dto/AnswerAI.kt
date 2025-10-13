@@ -1,4 +1,4 @@
-package ru.ai.assistant.application
+package ru.ai.assistant.application.dto
 
 data class AnswerAI(
     val answer: String,

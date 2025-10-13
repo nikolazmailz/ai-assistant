@@ -6,8 +6,8 @@ import org.springframework.data.relational.core.mapping.Table
 import java.time.OffsetDateTime
 import java.util.UUID
 
-@Table("system_promnt")
-data class SystemPromnt(
+@Table("system_prompt")
+data class SystemPrompt(
     @Id
     val id: UUID? = null,
 

@@ -12,8 +12,8 @@ import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
-import ru.ai.assistant.api.TelegramWebhookController
-import ru.ai.assistant.application.AiAssistantHandler
+import ru.ai.assistant.controller.TelegramWebhookController
+import ru.ai.assistant.application.handler.AiAssistantHandler
 import ru.ai.assistant.infra.openapi.OpenAISenderImpl
 
 @SpringBootTest(

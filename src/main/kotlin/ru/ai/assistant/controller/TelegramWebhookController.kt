@@ -1,12 +1,11 @@
-package ru.ai.assistant.api
+package ru.ai.assistant.controller
 
 import kotlinx.coroutines.reactor.mono
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
-import ru.ai.assistant.application.AiAssistantHandler
+import ru.ai.assistant.application.handler.AiAssistantHandler
 import ru.ai.assistant.domain.TelegramUpdate
 
 /**
@@ -16,14 +15,12 @@ import ru.ai.assistant.domain.TelegramUpdate
 @RequestMapping("/tg")
 class TelegramWebhookController(
     private val aiAssistantHandler: AiAssistantHandler
-//    private val telegramClient: TelegramClient
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("/webhook")
     fun onUpdate(@RequestBody update: TelegramUpdate): Mono<ResponseEntity<Void>> {
         log.info("Got update: {}", update)
-//        telegramClient.sendMessage(update.message?.chat?.id!!, "Hi").subscribe()
         return mono {
             aiAssistantHandler.handleMessage(update)
             ResponseEntity.ok().build<Void>()

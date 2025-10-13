@@ -2,10 +2,9 @@ package ru.ai.assistant.infra.sheduler
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import ru.ai.assistant.application.AiAssistantHandler
+import ru.ai.assistant.application.handler.AiAssistantHandler
 import ru.ai.assistant.config.scheduler.SchedulerProperties
 
 @Component

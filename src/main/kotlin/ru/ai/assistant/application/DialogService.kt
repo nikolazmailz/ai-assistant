@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service
 import ru.ai.assistant.domain.DialogQueue
 import com.fasterxml.jackson.core.type.TypeReference
 import io.github.oshai.kotlinlogging.KotlinLogging
-import ru.ai.assistant.application.openai.OpenAISender
+import ru.ai.assistant.application.dto.AnswerAI
+import ru.ai.assistant.application.dto.AnswerAIType
+import ru.ai.assistant.application.openai.AISender
 import ru.ai.assistant.db.RawSqlService
 import ru.ai.assistant.db.SqlScript
 import ru.ai.assistant.domain.DialogQueueRepository
@@ -18,13 +20,13 @@ import ru.ai.assistant.domain.audit.AuditLogEntity
 import ru.ai.assistant.domain.audit.AuditLogRepository
 import ru.ai.assistant.domain.audit.PayloadTypeLog
 import ru.ai.assistant.infra.TelegramClient
-import ru.ai.assistant.security.sql.AnswerAiGuard
+import ru.ai.assistant.application.security.sql.AnswerAiGuard
 import java.time.Instant
 import java.time.LocalDateTime
 
 @Service
 class DialogService(
-    private val openAISender: OpenAISender,
+    private val openAISender: AISender,
     private val telegramClient: TelegramClient,
     private val auditLogRepository: AuditLogRepository,
     private val rawSqlService: RawSqlService,
@@ -86,7 +88,7 @@ class DialogService(
 
             if (answer.sql != null && answer.sql != "") {
 
-                if(!answerAiGuard.validate(answer)){
+                if(!answerAiGuard.sqlValidate(answer)){
                     dialogQueueRepository.save(
                         DialogQueue(
                             userId       = dialog.userId,

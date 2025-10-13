@@ -1,4 +1,4 @@
-package ru.ai.assistant.domain
+package ru.ai.assistant.domain.metainfo
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
@@ -40,5 +40,10 @@ data class DialogMetaInfoEntity(
     val createdAt: OffsetDateTime? = null,
 
     @Column("updated_at")
-    var updatedAt: OffsetDateTime? = null
+    var updatedAt: OffsetDateTime? = null,
+
+    // todo add migrate
+    var levelOfResponseCompleteness: LevelOfResponseCompleteness? = LevelOfResponseCompleteness.MEDIUM
+
+    // todo currentTime добавить в DialogMetaInfoEntity??
 )

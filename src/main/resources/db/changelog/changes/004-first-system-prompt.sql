@@ -1,9 +1,9 @@
 --liquibase formatted sql
 
--- changeset ai-assistant:004-first-system-promnt
--- первый системный промнт
+-- changeset ai-assistant:004-first-system-prompt
+-- первый системный промпт
 
-INSERT INTO system_promnt (name, description, content, is_active)
+INSERT INTO system_prompt (name, description, content, is_active)
 VALUES (
     'default',
     'Системный предпромпт Telegram-ассистента (формат JSON-массива AnswerAI).',

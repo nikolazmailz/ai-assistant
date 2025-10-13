@@ -1,4 +1,4 @@
-package ru.ai.assistant.api
+package ru.ai.assistant.controller
 
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
