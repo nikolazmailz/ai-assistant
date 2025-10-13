@@ -34,7 +34,7 @@ class PromptComponent(
 
         return "$dialogInfoPrompt \n " +
                 "$WHO_AMI \n " +
-                "${dialogInfo.levelOfResponseCompleteness} \n " +
+                "${dialogInfo.levelOfResponseCompleteness?.levelPrompt} \n " +
                 "$globalPromptContent \n Твои знания: $knowledge \n" +
                 ""
     }
