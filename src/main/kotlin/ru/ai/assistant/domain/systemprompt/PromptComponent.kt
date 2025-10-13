@@ -2,6 +2,8 @@ package ru.ai.assistant.domain.systemprompt
 
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
+import ru.ai.assistant.db.RawSqlService
+import ru.ai.assistant.db.SqlScript
 import ru.ai.assistant.domain.metainfo.DialogMetaInfoEntity
 import java.time.OffsetDateTime
 
@@ -11,25 +13,30 @@ import java.time.OffsetDateTime
  * Системный промпт должен включать в себя:
  * 1. DialogInfo - данные о диалоге
  * 2. Ты — полезный AI-ассистент.
- * 3. Уровень объема ответа - LevelOfResponseCompleteness
- * 4. Твои знания: $knowledge
+ * 3. Уровень объема ответа - LevelOfResponseCompleteness (dialogInfo.levelOfResponseCompleteness)
+ * 4. System Prompt
+ * 5. Твои знания: $knowledge
  *
  * */
 @Component
 class PromptComponent(
     private val systemPromptRepository: SystemPromptRepository,
+    private val rawSqlService: RawSqlService,
 ) {
 
+    suspend fun collectSystemPrompt(dialogInfo: DialogMetaInfoEntity): String {
 
-    suspend fun collectSystemPrompt(dialogInfo: DialogMetaInfoEntity): Mono<String> {
+        val dialogInfoPrompt = createDialogInfoPrompt(dialogInfo)
 
-        val dialogInfoPrompt =  createDialogInfoPrompt(dialogInfo)
+        val globalPrompt = systemPromptRepository.findFirstByIsActiveTrue()!!
+        val globalPromptContent = globalPrompt.content
+        val knowledge = rawSqlService.execute(SqlScript.QUERY_ALL_DATA)
 
-//        val levelOfResponseCompleteness = dialogInfo.levelOfResponseCompleteness
-
-        val globalPrompt = systemPromptRepository
-
-        return Mono.just("todo")
+        return "$dialogInfoPrompt \n " +
+                "$WHO_AMI \n " +
+                "${dialogInfo.levelOfResponseCompleteness} \n " +
+                "$globalPromptContent \n Твои знания: $knowledge \n" +
+                ""
     }
 
     private fun createDialogInfoPrompt(dialogInfo: DialogMetaInfoEntity): String = """ 
@@ -42,10 +49,7 @@ class PromptComponent(
 
 
     companion object {
-
-
-
-
+        private const val WHO_AMI = "Ты — полезный AI-ассистент."
     }
 
 }

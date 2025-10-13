@@ -8,9 +8,9 @@ import com.fasterxml.jackson.core.type.TypeReference
 import io.github.oshai.kotlinlogging.KotlinLogging
 import ru.ai.assistant.application.dto.AnswerAI
 import ru.ai.assistant.application.dto.AnswerAIType
+import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
 import ru.ai.assistant.application.openai.AISender
 import ru.ai.assistant.db.RawSqlService
-import ru.ai.assistant.db.SqlScript
 import ru.ai.assistant.domain.DialogQueueRepository
 import ru.ai.assistant.domain.Direction
 import ru.ai.assistant.domain.PayloadType
@@ -21,8 +21,8 @@ import ru.ai.assistant.domain.audit.AuditLogRepository
 import ru.ai.assistant.domain.audit.PayloadTypeLog
 import ru.ai.assistant.infra.TelegramClient
 import ru.ai.assistant.application.security.sql.AnswerAiGuard
+import ru.ai.assistant.domain.systemprompt.PromptComponent
 import java.time.Instant
-import java.time.LocalDateTime
 
 @Service
 class DialogService(
@@ -32,6 +32,8 @@ class DialogService(
     private val rawSqlService: RawSqlService,
     private val dialogQueueRepository: DialogQueueRepository,
     private val answerAiGuard: AnswerAiGuard,
+    private val promptComponent: PromptComponent,
+    private val dialogMetaInfoEntityService: DialogMetaInfoEntityService,
 ) {
 
     private val log = KotlinLogging.logger {}
@@ -52,16 +54,21 @@ class DialogService(
          *
          * */
 
-        val knowledge = rawSqlService.execute(SqlScript.QUERY_ALL_DATA)
+//        val knowledge = rawSqlService.execute(SqlScript.QUERY_ALL_DATA)
 
-        val jsonText = knowledge.first()["tables"] as String
+//        val jsonText = knowledge.first()["tables"] as String
+//
+//        val additionalData = "\n userId = ${dialog.userId} \n systemTime = ${LocalDateTime.now()}"
+//
+//        log.debug { "Get knowledge $jsonText" }
 
 
-        val additionalData = "\n userId = ${dialog.userId} \n systemTime = ${LocalDateTime.now()}"
+        val prompt = promptComponent.collectSystemPrompt(
+            dialogMetaInfoEntityService.getOrCreateDialog(userId = dialog.userId)
+        )
 
-        log.debug { "Get knowledge $jsonText" }
 
-        val response = openAISender.chatWithGPT(dialog.payload!!, jsonText + additionalData).awaitSingleOrNull()
+        val responseAi = openAISender.chatWithGPT(dialog.payload!!, prompt).awaitSingleOrNull()
 
         auditLogRepository.save(
             AuditLogEntity(
@@ -70,13 +77,13 @@ class DialogService(
 //                sessionId = sessionId,
                 source = "AI",
                 payloadTypeLog = PayloadTypeLog.TEXT,
-                payload = response
+                payload = responseAi
                 // id/createdAt/updatedAt — оставляем на DEFAULT в БД
             )
         )
 
         val answers: List<AnswerAI> = jacksonObjectMapper().readValue(
-            response,
+            responseAi,
             object : TypeReference<List<AnswerAI>>() {}
         )
         log.info { "ConversionService answers $answers" }

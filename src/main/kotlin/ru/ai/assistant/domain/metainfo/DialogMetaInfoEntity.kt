@@ -25,7 +25,7 @@ data class DialogMetaInfoEntity(
     val id: UUID? = null,
 
     @Column("title")
-    var title: String,
+    var title: String? = null,
 
     @Column("description")
     var description: String? = null,
@@ -46,4 +46,12 @@ data class DialogMetaInfoEntity(
     var levelOfResponseCompleteness: LevelOfResponseCompleteness? = LevelOfResponseCompleteness.MEDIUM
 
     // todo currentTime добавить в DialogMetaInfoEntity??
-)
+) {
+    companion object {
+        fun create(userId: Long) : DialogMetaInfoEntity =
+            DialogMetaInfoEntity(
+                userId = userId,
+                isActive = true
+            )
+    }
+}
