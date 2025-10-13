@@ -11,3 +11,5 @@ databaseChangeLog:
       file: db/changelog/changes/005-create-dialog-metainfo.sql
   - include:
       file: db/changelog/changes/006-insert-initial-system-prompt.sql
+  - include:
+      file: db/changelog/changes/007-add-column-level_of_response_completeness.sql
