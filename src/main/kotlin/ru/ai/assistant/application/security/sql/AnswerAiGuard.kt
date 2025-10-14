@@ -49,12 +49,28 @@ class AnswerAiGuard {
         }
 
     private fun sqlDanger(sql: String, mode: Mode): Boolean {
+//        val s = sanitizeSql(sql)
+//        return when (mode) {
+//            Mode.OFF -> false
+//            Mode.RELAXED -> listOf(DROP_ANY, TRUNCATE, ALTER_DROP).any { it.containsMatchIn(s) }
+//            Mode.STRICT -> listOf(DROP_ANY, TRUNCATE, ALTER_DROP, DELETE_FROM).any { it.containsMatchIn(s) }
+//        }
+
         val s = sanitizeSql(sql)
-        return when (mode) {
-            Mode.OFF -> false
-            Mode.RELAXED -> listOf(DROP_ANY, TRUNCATE, ALTER_DROP).any { it.containsMatchIn(s) }
-            Mode.STRICT -> listOf(DROP_ANY, TRUNCATE, ALTER_DROP, DELETE_FROM).any { it.containsMatchIn(s) }
+        val rules = when (mode) {
+            Mode.OFF -> emptyList()
+            Mode.RELAXED -> listOf("DROP_ANY" to DROP_ANY, "TRUNCATE" to TRUNCATE, "ALTER_DROP" to ALTER_DROP)
+            Mode.STRICT -> listOf("DROP_ANY" to DROP_ANY, "TRUNCATE" to TRUNCATE, "ALTER_DROP" to ALTER_DROP, "DELETE_FROM" to DELETE_FROM)
         }
+
+        for ((name, rx) in rules) {
+            if (rx.containsMatchIn(s)) {
+                log.warn { "SQL guard hit: rule=$name, mode=$mode, sanitized='${s.trim()}'" }
+                return true
+            }
+        }
+        log.debug { "SQL guard passed: mode=$mode, sanitized='${s.trim()}'" }
+        return false
     }
 
     private fun sanitizeSql(input: String): String {
@@ -71,6 +87,6 @@ class AnswerAiGuard {
     private val TRUNCATE = Regex("""\bTRUNCATE\b(\s+TABLE\b)?""", RegexOption.IGNORE_CASE)
     private val ALTER_DROP = Regex("""\bALTER\s+TABLE\b[\s\S]*?\bDROP\s+(COLUMN|CONSTRAINT)\b""", RegexOption.IGNORE_CASE)
     private val DELETE_FROM = Regex("""\bDELETE\s+FROM\b""", RegexOption.IGNORE_CASE)
-    private val UPDATE_NO_WHERE = Regex("""\bUPDATE\b(?![\s\S]*\bWHERE\b)""", RegexOption.IGNORE_CASE)
+//    private val UPDATE_NO_WHERE = Regex("""\bUPDATE\b(?![\s\S]*\bWHERE\b)""", RegexOption.IGNORE_CASE)
 
 }

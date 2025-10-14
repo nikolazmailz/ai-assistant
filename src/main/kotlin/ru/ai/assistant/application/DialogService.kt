@@ -105,7 +105,7 @@ class DialogService(
             responseAi,
             object : TypeReference<List<AnswerAI>>() {}
         )
-        log.info { "ConversionService answers $answers" }
+        log.info { "DialogService answers $answers" }
 
         var fullAnswer = ""
 
