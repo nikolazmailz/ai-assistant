@@ -1,5 +1,6 @@
 package ru.ai.assistant.application.security.sql
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.ai.assistant.application.dto.AnswerAI
 import ru.ai.assistant.application.security.sql.dto.Mode
@@ -7,9 +8,12 @@ import ru.ai.assistant.application.security.sql.dto.Mode
 @Component
 class AnswerAiGuard {
 
+    private val log = KotlinLogging.logger {}
+
     /** Бросает DestructiveSqlException, если объект опасен в своём режиме master. */
     fun sqlValidate(ai: AnswerAI): Boolean {
         val mode = parseMode(ai.master)
+        log.debug { "AnswerAiGuard $mode" }
         return if (sqlDanger(ai.sql!!, mode)) {
             false
 //            throw DestructiveSqlException(

@@ -121,6 +121,8 @@ class DialogService(
                     } catch (e: Exception) {
                         log.error(e) { "Ошибка при выполнении SQL" }
                     }
+                } else {
+                    log.debug { "answerAiGuard.sqlValidat false by ${answer.sql}" }
                 }
             }
 
