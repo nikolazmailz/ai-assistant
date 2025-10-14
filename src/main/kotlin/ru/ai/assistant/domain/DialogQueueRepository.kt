@@ -9,6 +9,7 @@ import java.util.UUID
 interface DialogQueueRepository : CoroutineCrudRepository<DialogQueue, UUID> {
 
     fun findAllByDialogIdOrderByCreatedAtAsc(dialogId: UUID): Flow<DialogQueue>
+    fun findAllByDialogIdOrderByCreatedAtDesc(dialogId: UUID): Flow<DialogQueue>
     fun findAllByChatIdOrderByCreatedAtAsc(chatId: Long): Flow<DialogQueue>
 
     @Query(

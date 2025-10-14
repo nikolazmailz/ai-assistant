@@ -7,6 +7,7 @@ import ru.ai.assistant.domain.DialogQueue
 import com.fasterxml.jackson.core.type.TypeReference
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import ru.ai.assistant.application.dto.AnswerAI
 import ru.ai.assistant.application.dto.AnswerAIType
 import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
@@ -68,13 +69,11 @@ class DialogService(
             dialogMetaInfoEntityService.getDialogMetaInfoById(dialog.id!!)
         )
 
-        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialog.id)
-
-        val allDialogs = dialogs.map {
+        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtDesc(dialog.id).map {
             it.payload + "\n"
         }.toString()
 
-        val responseAi = openAISender.chatWithGPT(dialog.payload!!, "$allDialogs \n $prompt").awaitSingleOrNull()
+        val responseAi = openAISender.chatWithGPT(dialogs, prompt).awaitSingleOrNull()
 
         auditLogRepository.save(
             AuditLogEntity(
