@@ -120,6 +120,7 @@ class OpenAISenderImpl(
         )
 
         log.debug { "chatWithGPT request ${jacksonObjectMapper().writeValueAsString(request).take(300)}" }
+        log.debug { "chatWithGPT request ${jacksonObjectMapper().writeValueAsString(request).takeLast(300)}" }
 
         return openaiWebClient.post()
             .uri("/chat/completions")
