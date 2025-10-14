@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.ai.assistant.application.DialogService
-import ru.ai.assistant.application.handler.PollResult
+import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
 import ru.ai.assistant.domain.DialogQueue
 import ru.ai.assistant.domain.DialogQueueRepository
 import ru.ai.assistant.domain.Direction
@@ -23,6 +23,7 @@ class AiAssistantHandler (
     private val auditLogRepository: AuditLogRepository,
     private val dialogQueueRepository: DialogQueueRepository,
     private val dialogService: DialogService,
+    private val dialogMetaInfoEntityService: DialogMetaInfoEntityService,
 ) {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -46,6 +47,8 @@ class AiAssistantHandler (
             )
         )
 
+        val dialogMetaInfo = dialogMetaInfoEntityService.getOrCreateDialogMetaInfo(userId = message.from.id)
+
         dialogQueueRepository.save(
             DialogQueue(
                 userId = message.from.id,
@@ -53,7 +56,7 @@ class AiAssistantHandler (
                 payload = text,
                 status = QueueStatus.NEW,
                 scheduledAt = Instant.now().plusSeconds(5),
-//                dialogId     = UUID.randomUUID(),
+                dialogId     = dialogMetaInfo.id,
                 source = "telegram",
                 direction = Direction.INBOUND,
                 role = RoleType.USER,

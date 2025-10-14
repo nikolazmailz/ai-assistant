@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import ru.ai.assistant.domain.DialogQueue
 import com.fasterxml.jackson.core.type.TypeReference
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.flow.map
 import ru.ai.assistant.application.dto.AnswerAI
 import ru.ai.assistant.application.dto.AnswerAIType
 import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
@@ -64,11 +65,16 @@ class DialogService(
 
 
         val prompt = promptComponent.collectSystemPrompt(
-            dialogMetaInfoEntityService.getOrCreateDialog(userId = dialog.userId)
+            dialogMetaInfoEntityService.getDialogMetaInfoById(dialog.id!!)
         )
 
+        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialog.id)
 
-        val responseAi = openAISender.chatWithGPT(dialog.payload!!, prompt).awaitSingleOrNull()
+        val allDialogs = dialogs.map {
+            it.payload + "\n"
+        }.toString()
+
+        val responseAi = openAISender.chatWithGPT(dialog.payload!!, "$allDialogs \n $prompt").awaitSingleOrNull()
 
         auditLogRepository.save(
             AuditLogEntity(
@@ -79,6 +85,21 @@ class DialogService(
                 payloadTypeLog = PayloadTypeLog.TEXT,
                 payload = responseAi
                 // id/createdAt/updatedAt — оставляем на DEFAULT в БД
+            )
+        )
+
+        dialogQueueRepository.save(
+            DialogQueue(
+                userId = dialog.userId,
+                chatId = dialog.chatId,
+                payload = responseAi,
+                status = QueueStatus.ERROR,
+                scheduledAt = Instant.now().plusSeconds(5),
+//                dialogId     = UUID.randomUUID(),
+                source = "ai",
+                direction = Direction.INBOUND,
+                role = RoleType.ASSISTANT,
+                payloadType = PayloadType.TEXT,
             )
         )
 
@@ -95,46 +116,29 @@ class DialogService(
 
             if (answer.sql != null && answer.sql != "") {
 
-                if(!answerAiGuard.sqlValidate(answer)){
-                    dialogQueueRepository.save(
-                        DialogQueue(
-                            userId       = dialog.userId,
-                            chatId       = dialog.chatId,
-                            payload      = jacksonObjectMapper().writeValueAsString(answers),
-                            status       = QueueStatus.ERROR,
-                            scheduledAt  = Instant.now().plusSeconds(5),
-//                dialogId     = UUID.randomUUID(),
-                            source       = "ai",
-                            direction    = Direction.INBOUND,
-                            role         = RoleType.ASSISTANT,
-                            payloadType  = PayloadType.TEXT,
-                        )
-                    )
-
-                    return
-                }
-
-                try {
-                    val rawSqlServiceResult = rawSqlService.execute(answer.sql)
-                    log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }
-                } catch (e: Exception) {
-                    log.error(e) { "Ошибка при выполнении SQL" }
+                if (!answerAiGuard.sqlValidate(answer)) {
+                    try {
+                        val rawSqlServiceResult = rawSqlService.execute(answer.sql)
+                        log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }
+                    } catch (e: Exception) {
+                        log.error(e) { "Ошибка при выполнении SQL" }
+                    }
                 }
             }
 
-            if (answer.action == AnswerAIType.REPLY_TO_LLM) {
+            if (answer.action == AnswerAIType.SQL_FOR_AI) {
                 dialogQueueRepository.save(
                     DialogQueue(
-                        userId       = dialog.userId,
-                        chatId       = dialog.chatId,
-                        payload      = jacksonObjectMapper().writeValueAsString(answer),
-                        status       = QueueStatus.NEW,
-                        scheduledAt  = Instant.now().plusSeconds(5),
-//                dialogId     = UUID.randomUUID(),
-                        source       = "telegram",
-                        direction    = Direction.INBOUND,
-                        role         = RoleType.ASSISTANT,
-                        payloadType  = PayloadType.TEXT,
+                        userId = dialog.userId,
+                        chatId = dialog.chatId,
+                        payload = jacksonObjectMapper().writeValueAsString(answer),
+                        status = QueueStatus.NEW,
+                        scheduledAt = Instant.now().plusSeconds(5),
+                        dialogId     = dialog.id,
+                        source = "AI",
+                        direction = Direction.INBOUND,
+                        role = RoleType.ASSISTANT,
+                        payloadType = PayloadType.TEXT,
 //                stepKind     = "request",
 //                nextStepHint = "llm_call,
 //                actionType   = null,
@@ -145,8 +149,12 @@ class DialogService(
             }
         }
 
+        if(fullAnswer.isNotBlank()) {
+            telegramClient.sendMessage(dialog.chatId, fullAnswer).awaitSingleOrNull()
+        }
 
-        telegramClient.sendMessage(dialog.chatId, fullAnswer).awaitSingleOrNull()
+        log.debug { "fullAnswer $fullAnswer" }
+
 
     }
 

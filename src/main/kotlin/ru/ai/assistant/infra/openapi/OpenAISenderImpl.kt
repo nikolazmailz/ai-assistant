@@ -1,5 +1,6 @@
 package ru.ai.assistant.infra.openapi
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -118,7 +119,7 @@ class OpenAISenderImpl(
             )
         )
 
-        log.debug { "chatWithGPT request $request" }
+        log.debug { "chatWithGPT request ${jacksonObjectMapper().writeValueAsString(request).take(300)}" }
 
         return openaiWebClient.post()
             .uri("/chat/completions")
