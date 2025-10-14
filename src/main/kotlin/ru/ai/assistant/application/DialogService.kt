@@ -7,7 +7,6 @@ import ru.ai.assistant.domain.DialogQueue
 import com.fasterxml.jackson.core.type.TypeReference
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import ru.ai.assistant.application.dto.AnswerAI
 import ru.ai.assistant.application.dto.AnswerAIType
 import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
@@ -40,7 +39,7 @@ class DialogService(
 
     private val log = KotlinLogging.logger {}
 
-    suspend fun handleMsg(dialog: DialogQueue) {
+    suspend fun handleMsg(dialogQueue: DialogQueue) {
 
         // todo UseCase
 
@@ -66,10 +65,10 @@ class DialogService(
 
 
         val prompt = promptComponent.collectSystemPrompt(
-            dialogMetaInfoEntityService.getDialogMetaInfoById(dialog.id!!)
+            dialogMetaInfoEntityService.getDialogMetaInfoById(dialogQueue.dialogId!!)
         )
 
-        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtDesc(dialog.id).map {
+        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtDesc(dialogQueue.dialogId).map {
             it.payload + "\n"
         }.toString()
 
@@ -77,8 +76,8 @@ class DialogService(
 
         auditLogRepository.save(
             AuditLogEntity(
-                userId = dialog.userId,
-                chatId = dialog.chatId,
+                userId = dialogQueue.userId,
+                chatId = dialogQueue.chatId,
 //                sessionId = sessionId,
                 source = "AI",
                 payloadTypeLog = PayloadTypeLog.TEXT,
@@ -89,8 +88,8 @@ class DialogService(
 
         dialogQueueRepository.save(
             DialogQueue(
-                userId = dialog.userId,
-                chatId = dialog.chatId,
+                userId = dialogQueue.userId,
+                chatId = dialogQueue.chatId,
                 payload = responseAi,
                 status = QueueStatus.ERROR,
                 scheduledAt = Instant.now().plusSeconds(5),
@@ -128,12 +127,12 @@ class DialogService(
             if (answer.action == AnswerAIType.SQL_FOR_AI) {
                 dialogQueueRepository.save(
                     DialogQueue(
-                        userId = dialog.userId,
-                        chatId = dialog.chatId,
+                        userId = dialogQueue.userId,
+                        chatId = dialogQueue.chatId,
                         payload = jacksonObjectMapper().writeValueAsString(answer),
                         status = QueueStatus.NEW,
                         scheduledAt = Instant.now().plusSeconds(5),
-                        dialogId     = dialog.id,
+                        dialogId     = dialogQueue.dialogId,
                         source = "AI",
                         direction = Direction.INBOUND,
                         role = RoleType.ASSISTANT,
@@ -149,7 +148,7 @@ class DialogService(
         }
 
         if(fullAnswer.isNotBlank()) {
-            telegramClient.sendMessage(dialog.chatId, fullAnswer).awaitSingleOrNull()
+            telegramClient.sendMessage(dialogQueue.chatId, fullAnswer).awaitSingleOrNull()
         }
 
         log.debug { "fullAnswer $fullAnswer" }
