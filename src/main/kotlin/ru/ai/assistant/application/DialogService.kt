@@ -13,8 +13,6 @@ import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
 import ru.ai.assistant.application.openai.AISender
 import ru.ai.assistant.db.RawSqlService
 import ru.ai.assistant.domain.DialogQueueRepository
-import ru.ai.assistant.domain.Direction
-import ru.ai.assistant.domain.PayloadType
 import ru.ai.assistant.domain.QueueStatus
 import ru.ai.assistant.domain.RoleType
 import ru.ai.assistant.domain.audit.AuditLogEntity
@@ -22,6 +20,7 @@ import ru.ai.assistant.domain.audit.AuditLogRepository
 import ru.ai.assistant.domain.audit.PayloadTypeLog
 import ru.ai.assistant.infra.TelegramClient
 import ru.ai.assistant.application.security.sql.AnswerAiGuard
+import ru.ai.assistant.domain.SourceDialogType
 import ru.ai.assistant.domain.systemprompt.PromptComponent
 import java.time.Instant
 
@@ -90,14 +89,12 @@ class DialogService(
             DialogQueue(
                 userId = dialogQueue.userId,
                 chatId = dialogQueue.chatId,
-                payload = responseAi,
+                dialogId     = dialogQueue.dialogId,
                 status = QueueStatus.ERROR,
+                payload = responseAi,
                 scheduledAt = Instant.now().plusSeconds(5),
-//                dialogId     = UUID.randomUUID(),
-                source = "ai",
-                direction = Direction.INBOUND,
+                source = SourceDialogType.AI,
                 role = RoleType.ASSISTANT,
-                payloadType = PayloadType.TEXT,
             )
         )
 
@@ -131,19 +128,12 @@ class DialogService(
                     DialogQueue(
                         userId = dialogQueue.userId,
                         chatId = dialogQueue.chatId,
-                        payload = jacksonObjectMapper().writeValueAsString(answer),
+                        dialogId = dialogQueue.dialogId,
                         status = QueueStatus.NEW,
+                        payload = jacksonObjectMapper().writeValueAsString(answer),
                         scheduledAt = Instant.now().plusSeconds(5),
-                        dialogId     = dialogQueue.dialogId,
-                        source = "AI",
-                        direction = Direction.INBOUND,
-                        role = RoleType.ASSISTANT,
-                        payloadType = PayloadType.TEXT,
-//                stepKind     = "request",
-//                nextStepHint = "llm_call,
-//                actionType   = null,
-//                createdAt    = Instant.now(),
-//                updatedAt    = Instant.now()
+                        source = SourceDialogType.AI,
+                        role = RoleType.ASSISTANT
                     )
                 )
             }
@@ -155,8 +145,5 @@ class DialogService(
 
         log.debug { "fullAnswer $fullAnswer" }
 
-
     }
-
-
 }

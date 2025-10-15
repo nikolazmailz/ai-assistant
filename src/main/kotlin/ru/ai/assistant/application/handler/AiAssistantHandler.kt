@@ -8,10 +8,9 @@ import ru.ai.assistant.application.DialogService
 import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
 import ru.ai.assistant.domain.DialogQueue
 import ru.ai.assistant.domain.DialogQueueRepository
-import ru.ai.assistant.domain.Direction
-import ru.ai.assistant.domain.PayloadType
 import ru.ai.assistant.domain.QueueStatus
 import ru.ai.assistant.domain.RoleType
+import ru.ai.assistant.domain.SourceDialogType
 import ru.ai.assistant.domain.TelegramUpdate
 import ru.ai.assistant.domain.audit.AuditLogEntity
 import ru.ai.assistant.domain.audit.AuditLogRepository
@@ -53,19 +52,13 @@ class AiAssistantHandler (
             DialogQueue(
                 userId = message.from.id,
                 chatId = message.chat.id,
-                payload = text,
+                dialogId = dialogMetaInfo.id,
+                dialogTitle = dialogMetaInfo.title,
                 status = QueueStatus.NEW,
+                payload = text,
                 scheduledAt = Instant.now().plusSeconds(5),
-                dialogId     = dialogMetaInfo.id,
-                source = "telegram",
-                direction = Direction.INBOUND,
+                source = SourceDialogType.TELEGRAM,
                 role = RoleType.USER,
-                payloadType = PayloadType.TEXT,
-//                stepKind     = "request",
-//                nextStepHint = "llm_call,
-//                actionType   = null,
-//                createdAt    = Instant.now(),
-//                updatedAt    = Instant.now()
             )
         )
     }
