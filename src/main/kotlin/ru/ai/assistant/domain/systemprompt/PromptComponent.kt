@@ -45,7 +45,7 @@ class PromptComponent(
               "dialogId": "${dialogInfo.id}",
               "dialogName": "${dialogInfo.title}",
               "currentTime": "${OffsetDateTime.now()}"
-            }""".trim()
+            }""".trim().plus(" \n если ты видишь что,  \"dialogName\": \"null\" - то исходя из сообщения придумай название и обнови таблицу dialog_metainfo - это будет заголовок диалога.")
 
 
     companion object {
