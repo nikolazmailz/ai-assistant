@@ -119,8 +119,9 @@ class OpenAISenderImpl(
             )
         )
 
-        log.debug { "chatWithGPT request ${jacksonObjectMapper().writeValueAsString(request).take(300)}" }
-        log.debug { "chatWithGPT request ${jacksonObjectMapper().writeValueAsString(request).takeLast(300)}" }
+//        log.debug { "chatWithGPT request ${jacksonObjectMapper().writeValueAsString(request).take(300)}" }
+//        log.debug { "chatWithGPT request ${jacksonObjectMapper().writeValueAsString(request).takeLast(300)}" }
+        log.debug { "chatWithGPT request $request" }
 
         return openaiWebClient.post()
             .uri("/chat/completions")

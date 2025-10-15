@@ -75,10 +75,31 @@ class AnswerAiGuard {
 
     private fun sanitizeSql(input: String): String {
         var s = input
+        // 1) Удаляем многострочные комментарии
         s = Regex("/\\*.*?\\*/", RegexOption.DOT_MATCHES_ALL).replace(s, " ")
+        log.debug { "sanitizeSql result s1 $s" }
+
+        // 2) Удаляем однострочные комментарии
         s = Regex("(?m)--.*?$").replace(s, " ")
-        s = Regex("'([^']|'')*'").replace(s, " ")
-        s = Regex("\"([^\"]|\"\")*\"").replace(s, " ")
+        log.debug { "sanitizeSql result s2 $s" }
+
+        // 3) Заменяем строковые литералы на <str>
+        s = Regex("'([^']|'')*'").replace(s, " <str> ")
+        log.debug { "sanitizeSql result s3 $s" }
+
+        // 4) Заменяем двойные кавычки (quoted identifiers) на <ident>
+        s = Regex("\"([^\"]|\"\")*\"").replace(s, " <ident> ")
+        log.debug { "sanitizeSql result s4 $s" }
+
+        // (опц.) “умные” кавычки и бэктики:
+        s = Regex("‘([^‘]|‘‘)*’").replace(s, " <str> ")
+        log.debug { "sanitizeSql result s5 $s" }
+        s = Regex("`([^`]|``)*`").replace(s, " <ident> ")
+        log.debug { "sanitizeSql result s6 $s" }
+
+        // 5) Схлопываем пробелы
+        s = Regex("\\s+").replace(s, " ").trim()
+        log.debug { "sanitizeSql result s7 $s" }
         return s
     }
 
