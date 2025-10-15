@@ -2,6 +2,7 @@
 
 --changeset system:remove-old-dialog-queue-columns
 -- Удаляем устаревшие колонки из таблицы dialog_queue
+
 ALTER TABLE dialog_queue
     DROP COLUMN IF EXISTS direction,
     DROP COLUMN IF EXISTS payload_type,
