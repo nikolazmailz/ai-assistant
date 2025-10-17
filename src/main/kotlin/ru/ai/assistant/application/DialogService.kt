@@ -149,11 +149,12 @@ class DialogService(
         )
 
         var fullAnswer = ""
+        var sqlResult = ""
 
         for (answer in answers) {
             fullAnswer += answer.answer
 
-            var sqlResult = ""
+
 
             if (answer.sql != null && answer.sql != "") {
 
@@ -185,31 +186,42 @@ class DialogService(
                 } else {
                     log.debug { "answerAiGuard.sqlValidat false by ${answer.sql}" }
                 }
-
-            }
-
-            if (answer.action == AnswerAIType.SQL_FOR_AI) {
-                dialogQueueRepository.save(
-                    DialogQueue(
-                        userId = dialogQueue.userId,
-                        chatId = dialogQueue.chatId,
-                        dialogId = dialogQueue.dialogId,
-                        status = QueueStatus.NEW,
-                        payload = "SQL_FOR_AI result $sqlResult",
-                        scheduledAt = Instant.now().plusSeconds(5),
-                        source = SourceDialogType.AI,
-                        role = RoleType.ASSISTANT
-                    )
-                )
             }
 
         }
 
         if (fullAnswer.isNotBlank()) {
+            dialogQueueRepository.save(
+                DialogQueue(
+                    userId = dialogQueue.userId,
+                    chatId = dialogQueue.chatId,
+                    dialogId = dialogQueue.dialogId,
+                    status = QueueStatus.SUCCESS,
+                    payload = "answer $fullAnswer",
+                    scheduledAt = Instant.now().plusSeconds(5),
+                    source = SourceDialogType.AI,
+                    role = RoleType.ASSISTANT
+                )
+            )
             telegramClient.sendMessage(dialogQueue.chatId, fullAnswer).awaitSingleOrNull()
         }
 
-        log.debug { "fullAnswer $fullAnswer" }
+        if (sqlResult.isNotBlank()) {
+            dialogQueueRepository.save(
+                DialogQueue(
+                    userId = dialogQueue.userId,
+                    chatId = dialogQueue.chatId,
+                    dialogId = dialogQueue.dialogId,
+                    status = QueueStatus.NEW,
+                    payload = "SQL_FOR_AI result $sqlResult",
+                    scheduledAt = Instant.now().plusSeconds(5),
+                    source = SourceDialogType.AI,
+                    role = RoleType.ASSISTANT
+                )
+            )
+        }
+
+//        log.debug { "fullAnswer $fullAnswer" }
 
     }
 
