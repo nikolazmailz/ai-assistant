@@ -34,14 +34,15 @@ class PromptComponent(
         val globalPromptContent = globalPrompt.content
         val knowledge = rawSqlService.execute(SqlScript.QUERY_ALL_DATA)
 
-        return "$dialogInfoPrompt \n " +
+        val systemPrompt = "$dialogInfoPrompt \n " +
                 "$WHO_AMI \n " +
                 "${dialogInfo.levelOfResponseCompleteness?.levelPrompt} \n " +
                 "$globalPromptContent \n Твои знания: $knowledge \n" +
-                "".let {
-                    log.debug { "\n\n collectSystemPrompt \n $it \n\n" }
-                    it
-                }
+                ""
+
+        log.debug { "\n\n collectSystemPrompt \n" }
+        log.debug { "$systemPrompt \n\n" }
+        return systemPrompt
     }
 
     private fun createDialogInfoPrompt(dialogInfo: DialogMetaInfoEntity): String = """ 
