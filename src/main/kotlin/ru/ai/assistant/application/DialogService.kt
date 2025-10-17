@@ -124,6 +124,8 @@ class DialogService(
         )
 
 //        dialogs.first()
+        log.info { "DialogService answers ${jacksonObjectMapper().writeValueAsString(dialogs)}" }
+
         dialogs.addFirst( mapOf("role" to "system", "content" to prompt))
         val responseAi = openAISender.chatWithGPT(dialogs, prompt).awaitSingleOrNull()
 
