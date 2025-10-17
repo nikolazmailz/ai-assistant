@@ -108,7 +108,7 @@ class DialogService(
         auditService.logAnswersAi(dialogQueue.userId, dialogQueue.chatId, answers)
 
         var collectAnswer = ""
-        var collectResqultSql = ""
+        var collectResultSql = ""
 
         for (answer in answers) {
             collectAnswer += answer.answer
@@ -118,7 +118,7 @@ class DialogService(
                     try {
                         val rawSqlServiceResult = rawSqlService.executeSmart(answer.sql)
                         log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }
-                        collectResqultSql += "${jacksonObjectMapper().writeValueAsString(rawSqlServiceResult)} \n"
+                        collectResultSql += "${jacksonObjectMapper().writeValueAsString(rawSqlServiceResult)} \n"
                     } catch (e: Exception) {
                         dialogQueueRepository.save(
                             DialogQueue(
@@ -156,7 +156,7 @@ class DialogService(
             telegramClient.sendMessage(dialogQueue.chatId, collectAnswer).awaitSingleOrNull()
         }
 
-        if (collectResqultSql.isNotBlank()) {
+        if (collectResultSql.isNotBlank()) {
             dialogQueueRepository.save(
                 DialogQueue(
                     userId = dialogQueue.userId,
@@ -164,7 +164,7 @@ class DialogService(
                     dialogId = dialogQueue.dialogId,
                     dialogTitle = dialogQueue.dialogTitle,
                     status = QueueStatus.NEW,
-                    payload = "SQL_FOR_AI result $collectResqultSql",
+                    payload = "SQL_FOR_AI result $collectResultSql",
                     scheduledAt = Instant.now().plusSeconds(5),
                     source = SourceDialogType.AI,
                     role = RoleType.ASSISTANT
