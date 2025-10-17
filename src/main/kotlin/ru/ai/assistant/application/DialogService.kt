@@ -9,16 +9,13 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.toList
 import ru.ai.assistant.application.audit.AuditService
 import ru.ai.assistant.application.dto.AnswerAI
-import ru.ai.assistant.application.dto.AnswerAIType
 import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
 import ru.ai.assistant.application.openai.AISender
 import ru.ai.assistant.db.RawSqlService
 import ru.ai.assistant.domain.DialogQueueRepository
 import ru.ai.assistant.domain.QueueStatus
 import ru.ai.assistant.domain.RoleType
-import ru.ai.assistant.domain.audit.AuditLogEntity
 import ru.ai.assistant.domain.audit.AuditLogRepository
-import ru.ai.assistant.domain.audit.PayloadTypeLog
 import ru.ai.assistant.infra.TelegramClient
 import ru.ai.assistant.application.security.sql.AnswerAiGuard
 import ru.ai.assistant.domain.SourceDialogType
@@ -47,7 +44,7 @@ class DialogService(
 
         log.debug { "update.message.text: $payload" }
 
-        auditService.log(message, payload = payload)
+        auditService.logUserText(message, payload = payload)
 
         val dialogMetaInfo = dialogMetaInfoEntityService.getOrCreateDialogMetaInfo(userId = message.from!!.id).let {
             if (it.title == null) {
@@ -74,102 +71,55 @@ class DialogService(
         )
     }
 
-
+    /**
+     * Получить текущее время
+     * Получить предпомнт
+     * Сформировать истории диалога todo
+     * Дополнить к сообщение запрос
+     * Отправить
+     * Получить ответ, сохранить его в лог
+     * 1к - Что-то сделать и ответить пользователю
+     * 2к - Что-то сделать и сделать новую запись в ConversationQueueRepository
+     *
+     * */
     suspend fun handlePollMsg(dialogQueue: DialogQueue) {
-
-        // todo UseCase
-
-        /**
-         * Получить текущее время
-         * Получить предпомнт
-         * Сформировать истории диалога todo
-         * Дополнить к сообщение запрос
-         * Отправить
-         * Получить ответ, сохранить его в лог
-         * 1к - Что-то сделать и ответить пользователю
-         * 2к - Что-то сделать и сделать новую запись в ConversationQueueRepository
-         *
-         * */
-
-//        val knowledge = rawSqlService.execute(SqlScript.QUERY_ALL_DATA)
-
-//        val jsonText = knowledge.first()["tables"] as String
-//
-//        val additionalData = "\n userId = ${dialog.userId} \n systemTime = ${LocalDateTime.now()}"
-//
-//        log.debug { "Get knowledge $jsonText" }
-
-
-        val prompt = promptComponent.collectSystemPrompt(
-            dialogMetaInfoEntityService.getDialogMetaInfoById(dialogQueue.dialogId!!)
-        )
 
         val dialogs = mutableListOf<Map<String, String>>()
 
-
-//        val dialogs =
-            dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId)
+        dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId())
             .toList().forEach {
-                    dialogs.add(mapOf("role" to it.role.name.lowercase(), "content" to it.payload!!))
+                dialogs.add(mapOf("role" to it.role.name.lowercase(), "content" to it.payload!!))
             }
 
-        auditLogRepository.save(
-            AuditLogEntity(
-                userId = dialogQueue.userId,
-                chatId = dialogQueue.chatId,
-                source = "System",
-                payloadTypeLog = PayloadTypeLog.TEXT,
-                payload = jacksonObjectMapper().writeValueAsString(dialogs)
-            )
+        auditService.logDialogQueueHistory(dialogQueue.userId, dialogQueue.chatId, dialogs)
+
+        val systemPrompt = promptComponent.collectSystemPrompt(
+            dialogMetaInfoEntityService.getDialogMetaInfoById(dialogQueue.dialogId())
         )
+        dialogs.addFirst(mapOf("role" to "system", "content" to systemPrompt))
 
-//        dialogs.first()
-        log.info { "DialogService answers ${jacksonObjectMapper().writeValueAsString(dialogs)}" }
-
-        dialogs.addFirst( mapOf("role" to "system", "content" to prompt))
-        val responseAi = openAISender.chatWithGPT(dialogs, prompt).awaitSingleOrNull()
-
-//        val parseAiContent = parseAiContent(responseAi!!)
-
+        val responseAi = openAISender.chatWithGPT(dialogs, systemPrompt).awaitSingleOrNull()
 
         val answers: List<AnswerAI> = jacksonObjectMapper().readValue(
             responseAi,
             object : TypeReference<List<AnswerAI>>() {}
         )
-        log.info { "DialogService answers $answers" }
 
-        auditLogRepository.save(
-            AuditLogEntity(
-                userId = dialogQueue.userId,
-                chatId = dialogQueue.chatId,
-//                sessionId = sessionId,
-                source = "AI",
-                payloadTypeLog = PayloadTypeLog.TEXT,
-                payload = jacksonObjectMapper().writeValueAsString(answers)
-                // id/createdAt/updatedAt — оставляем на DEFAULT в БД
-            )
-        )
+        auditService.logAnswersAi(dialogQueue.userId, dialogQueue.chatId, answers)
 
-        var fullAnswer = ""
-        var sqlResult = ""
+        var collectAnswer = ""
+        var collectResqultSql = ""
 
         for (answer in answers) {
-            fullAnswer += answer.answer
-
-
+            collectAnswer += answer.answer
 
             if (answer.sql != null && answer.sql != "") {
-
                 if (answerAiGuard.sqlValidate(answer)) {
-
                     try {
                         val rawSqlServiceResult = rawSqlService.executeSmart(answer.sql)
                         log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }
-
-                        sqlResult += "${jacksonObjectMapper().writeValueAsString(rawSqlServiceResult)} \n"
-
+                        collectResqultSql += "${jacksonObjectMapper().writeValueAsString(rawSqlServiceResult)} \n"
                     } catch (e: Exception) {
-
                         dialogQueueRepository.save(
                             DialogQueue(
                                 userId = dialogQueue.userId,
@@ -177,22 +127,19 @@ class DialogService(
                                 dialogId = dialogQueue.dialogId,
                                 status = QueueStatus.ERROR,
                                 payload = jacksonObjectMapper().writeValueAsString(answer),
-//                                scheduledAt = Instant.now().plusSeconds(5),
                                 source = SourceDialogType.AI,
                                 role = RoleType.ASSISTANT,
                             )
                         )
-
                         log.error(e) { "Ошибка при выполнении SQL" }
                     }
                 } else {
                     log.debug { "answerAiGuard.sqlValidat false by ${answer.sql}" }
                 }
             }
-
         }
 
-        if (fullAnswer.isNotBlank()) {
+        if (collectAnswer.isNotBlank()) {
             dialogQueueRepository.save(
                 DialogQueue(
                     userId = dialogQueue.userId,
@@ -200,16 +147,16 @@ class DialogService(
                     dialogId = dialogQueue.dialogId,
                     dialogTitle = dialogQueue.dialogTitle,
                     status = QueueStatus.SUCCESS,
-                    payload = "answer $fullAnswer",
+                    payload = "answer $collectAnswer",
                     scheduledAt = Instant.now().plusSeconds(5),
                     source = SourceDialogType.AI,
                     role = RoleType.ASSISTANT
                 )
             )
-            telegramClient.sendMessage(dialogQueue.chatId, fullAnswer).awaitSingleOrNull()
+            telegramClient.sendMessage(dialogQueue.chatId, collectAnswer).awaitSingleOrNull()
         }
 
-        if (sqlResult.isNotBlank()) {
+        if (collectResqultSql.isNotBlank()) {
             dialogQueueRepository.save(
                 DialogQueue(
                     userId = dialogQueue.userId,
@@ -217,7 +164,7 @@ class DialogService(
                     dialogId = dialogQueue.dialogId,
                     dialogTitle = dialogQueue.dialogTitle,
                     status = QueueStatus.NEW,
-                    payload = "SQL_FOR_AI result $sqlResult",
+                    payload = "SQL_FOR_AI result $collectResqultSql",
                     scheduledAt = Instant.now().plusSeconds(5),
                     source = SourceDialogType.AI,
                     role = RoleType.ASSISTANT

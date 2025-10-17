@@ -52,7 +52,10 @@ data class DialogQueue(
 
     @Column("updated_at")
     val updatedAt: Instant = Instant.now() // NOT NULL
-)
+) {
+
+    fun dialogId() = this.dialogId!!
+}
 
 enum class QueueStatus { NEW, PROCESSING, WAITING, READY, SUCCESS, ERROR }
 enum class RoleType { USER, ASSISTANT, SYSTEM }

@@ -27,45 +27,45 @@ class AiAssistantHandler (
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    suspend fun handleMessage(update: TelegramUpdate) {
-        val message = update.message ?: return
-        val text = message.text ?: return
-
-        log.debug("update.message.text: $text")
-
-        // сохраняем входящее сообщение
-        auditLogRepository.save(
-            AuditLogEntity(
-                userId = message.from?.id!!,
-                chatId = message.chat.id,
-//                sessionId = sessionId,
-                source = "user",
-                payloadTypeLog = PayloadTypeLog.TEXT,
-                payload = text
-                // id/createdAt/updatedAt — оставляем на DEFAULT в БД
-            )
-        )
-
-        val dialogMetaInfo = dialogMetaInfoEntityService.getOrCreateDialogMetaInfo(userId = message.from.id)
-
-//        if(dialogMetaInfo.title == null) {
-//            // todo call llm for define title
-//        }
-
-        dialogQueueRepository.save(
-            DialogQueue(
-                userId = message.from.id,
-                chatId = message.chat.id,
-                dialogId = dialogMetaInfo.id,
-                dialogTitle = dialogMetaInfo.title,
-                status = QueueStatus.NEW,
-                payload = text,
-                scheduledAt = Instant.now().plusSeconds(5),
-                source = SourceDialogType.TELEGRAM,
-                role = RoleType.USER,
-            )
-        )
-    }
+//    suspend fun handleMessage(update: TelegramUpdate) {
+//        val message = update.message ?: return
+//        val text = message.text ?: return
+//
+//        log.debug("update.message.text: $text")
+//
+//        // сохраняем входящее сообщение
+//        auditLogRepository.save(
+//            AuditLogEntity(
+//                userId = message.from?.id!!,
+//                chatId = message.chat.id,
+////                sessionId = sessionId,
+//                source = "user",
+//                payloadTypeLog = PayloadTypeLog.TEXT,
+//                payload = text
+//                // id/createdAt/updatedAt — оставляем на DEFAULT в БД
+//            )
+//        )
+//
+//        val dialogMetaInfo = dialogMetaInfoEntityService.getOrCreateDialogMetaInfo(userId = message.from.id)
+//
+////        if(dialogMetaInfo.title == null) {
+////            // todo call llm for define title
+////        }
+//
+//        dialogQueueRepository.save(
+//            DialogQueue(
+//                userId = message.from.id,
+//                chatId = message.chat.id,
+//                dialogId = dialogMetaInfo.id,
+//                dialogTitle = dialogMetaInfo.title,
+//                status = QueueStatus.NEW,
+//                payload = text,
+//                scheduledAt = Instant.now().plusSeconds(5),
+//                source = SourceDialogType.TELEGRAM,
+//                role = RoleType.USER,
+//            )
+//        )
+//    }
 
     @Transactional
     suspend fun pollOnce(batchSize: Int): PollResult {
