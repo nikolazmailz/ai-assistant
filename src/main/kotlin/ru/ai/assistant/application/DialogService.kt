@@ -149,7 +149,7 @@ class DialogService(
                     dialogId = dialogQueue.dialogId,
                     dialogTitle = dialogQueue.dialogTitle,
                     status = QueueStatus.SUCCESS,
-                    payload = "answer $collectAnswer",
+                    payload = collectAnswer,
                     scheduledAt = Instant.now().plusSeconds(5),
                     source = SourceDialogType.AI,
                     role = RoleType.ASSISTANT
