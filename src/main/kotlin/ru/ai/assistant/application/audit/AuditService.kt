@@ -44,7 +44,7 @@ class AuditService(
     }
 
 
-    suspend fun logAnswersAi(userId: Long, chatId: Long, responseAi: String) {
+    suspend fun logAnswersAi(userId: Long, chatId: Long, responseAi: String?) {
 //        log.debug { "responseAi $responseAi" }
         auditLogRepository.save(
             AuditLogEntity(
