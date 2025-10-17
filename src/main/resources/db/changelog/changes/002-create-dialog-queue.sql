@@ -26,6 +26,7 @@ CREATE TABLE dialog_queue (
     status          TEXT NOT NULL DEFAULT 'NEW',         -- Статус шага: new (создан), processing (в работе), waiting (ожидание внешнего события), ready (готов к следующему этапу), success (завершён), error (ошибка).
     scheduled_at    TIMESTAMPTZ NOT NULL DEFAULT now(),          -- Плановое время выполнения шага (не брать задачу раньше этого момента).
     dialog_id       UUID,                                        -- логическая сессия, объединяющая серию шагов
+    dialog_title    TEXT,                                        -- имя диалога
     source          TEXT NOT NULL DEFAULT 'telegram',            -- источник: telegram / web / api
     direction       TEXT NOT NULL DEFAULT 'INBOUND',        -- направление шага: входящее/исходящее
     role            TEXT NOT NULL DEFAULT 'USER',           -- роль автора шага: user / assistant / system
@@ -47,6 +48,7 @@ COMMENT ON COLUMN dialog_queue.payload IS 'Содержимое шага (тек
 COMMENT ON COLUMN dialog_queue.status IS 'Статус шага: new (создан), processing (в работе), waiting (ожидание внешнего события), ready (готов к следующему этапу), success (завершён), error (ошибка).';
 COMMENT ON COLUMN dialog_queue.scheduled_at IS 'Плановое время выполнения шага (не брать задачу раньше этого момента).';
 COMMENT ON COLUMN dialog_queue.dialog_id IS 'UUID логической сессии, объединяющей серию шагов.';
+COMMENT ON COLUMN dialog_queue.dialog_title  IS 'Короткое имя или заголовок диалога (для отображения в интерфейсе).';
 COMMENT ON COLUMN dialog_queue.source IS 'Источник: telegram / web / api и т.п.';
 COMMENT ON COLUMN dialog_queue.direction IS 'Направление шага: inbound (входящее) или outbound (исходящее).';
 COMMENT ON COLUMN dialog_queue.role IS 'Роль автора шага: user / assistant / system.';

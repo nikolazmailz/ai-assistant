@@ -6,8 +6,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/003-create-system-prompt.sql
   - include:
-      file: db/changelog/changes/004-first-system-prompt.sql
-  - include:
       file: db/changelog/changes/005-create-dialog-metainfo.sql
   - include:
       file: db/changelog/changes/006-insert-initial-system-prompt.sql
@@ -17,5 +15,3 @@ databaseChangeLog:
       file: db/changelog/changes/008-alter-dialog_metainfo_title_not_null.sql
   - include:
       file: db/changelog/changes/009-remove-old-dialog-queue-columns.sql
-  - include:
-      file: db/changelog/changes/010-add-dialog-title-to-dialog-queue.sql
