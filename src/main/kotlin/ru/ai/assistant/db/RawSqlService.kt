@@ -27,4 +27,30 @@ class RawSqlService(
             .collectList()
             .awaitSingle()
     }
+
+    suspend fun executeSmart(sql: String): Any {
+        return try {
+            val rows = template.databaseClient
+                .sql(sql)
+                .map { row, meta ->
+                    val result = linkedMapOf<String, Any?>()
+                    meta.columnMetadatas.forEachIndexed { i, cmd ->
+                        result[cmd.name] = row.get(i)
+                    }
+                    result
+                }
+                .all()
+                .collectList()
+                .awaitSingle()
+
+            if (rows.isNotEmpty()) {
+                mapOf("type" to "rows", "rows" to rows)
+            } else {
+                val updated = template.databaseClient.sql(sql).fetch().rowsUpdated().awaitSingle()
+                mapOf("type" to "rowsAffected", "rowsAffected" to updated)
+            }
+        } catch (e: Exception) {
+            mapOf("type" to "error", "message" to e.message)
+        }
+    }
 }

@@ -71,7 +71,7 @@ class DialogService(
 
         val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId)
             .toList().map {
-               "${it.role}: ${it.payload} + \n"
+               "${it.role}: ${it.payload} \n"
             }.toString()
 
         auditLogRepository.save(
@@ -119,10 +119,10 @@ class DialogService(
                 if (answerAiGuard.sqlValidate(answer)) {
 
                     try {
-                        val rawSqlServiceResult = rawSqlService.execute(answer.sql)
+                        val rawSqlServiceResult = rawSqlService.executeSmart(answer.sql)
                         log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }
 
-                        sqlResult += "${jacksonObjectMapper().writeValueAsString(rawSqlServiceResult)} \n\n"
+                        sqlResult += "${jacksonObjectMapper().writeValueAsString(rawSqlServiceResult)} \n"
 
                     } catch (e: Exception) {
 
