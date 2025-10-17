@@ -50,11 +50,11 @@ COMMENT ON COLUMN dialog_queue.scheduled_at IS 'Плановое время вы
 COMMENT ON COLUMN dialog_queue.dialog_id IS 'UUID логической сессии, объединяющей серию шагов.';
 COMMENT ON COLUMN dialog_queue.dialog_title  IS 'Короткое имя или заголовок диалога (для отображения в интерфейсе).';
 COMMENT ON COLUMN dialog_queue.source IS 'Источник: telegram / web / api и т.п.';
-COMMENT ON COLUMN dialog_queue.direction IS 'Направление шага: inbound (входящее) или outbound (исходящее).';
+--COMMENT ON COLUMN dialog_queue.direction IS 'Направление шага: inbound (входящее) или outbound (исходящее).';
 COMMENT ON COLUMN dialog_queue.role IS 'Роль автора шага: user / assistant / system.';
-COMMENT ON COLUMN dialog_queue.payload_type IS 'Тип полезной нагрузки: text / voice / photo / document / unknown.';
-COMMENT ON COLUMN dialog_queue.step_kind IS 'Тип шага для роутера: request, response, replyToLLM.';
-COMMENT ON COLUMN dialog_queue.next_step_hint IS 'Подсказка о предполагаемом следующем шаге (для простого роутинга).';
-COMMENT ON COLUMN dialog_queue.action_type IS 'Тип действия: send_reply, fetch_calendar, run_sql, call_service и т.п.';
+--COMMENT ON COLUMN dialog_queue.payload_type IS 'Тип полезной нагрузки: text / voice / photo / document / unknown.';
+--COMMENT ON COLUMN dialog_queue.step_kind IS 'Тип шага для роутера: request, response, replyToLLM.';
+--COMMENT ON COLUMN dialog_queue.next_step_hint IS 'Подсказка о предполагаемом следующем шаге (для простого роутинга).';
+--COMMENT ON COLUMN dialog_queue.action_type IS 'Тип действия: send_reply, fetch_calendar, run_sql, call_service и т.п.';
 COMMENT ON COLUMN dialog_queue.created_at IS 'Метка времени создания шага.';
 COMMENT ON COLUMN dialog_queue.updated_at IS 'Метка времени последнего обновления шага.';
