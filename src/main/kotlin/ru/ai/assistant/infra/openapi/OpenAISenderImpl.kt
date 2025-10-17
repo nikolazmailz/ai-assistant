@@ -4,6 +4,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 import ru.ai.assistant.application.openai.AISender
 import ru.ai.assistant.infra.openapi.dto.ChatCompletionResponse
@@ -77,9 +78,9 @@ class OpenAISenderImpl(
         val request = mapOf(
             "model" to "gpt-4o-mini",
 //            "model" to "gpt-3.5-turbo",
-            "messages" to prompt,
-            "temperature" to 0,
-            "response_format" to schema
+            "messages" to prompt
+//            "temperature" to 0,
+//            "response_format" to schema
         )
 
 //        "messages" to listOf(
@@ -92,15 +93,31 @@ class OpenAISenderImpl(
             .uri("/chat/completions")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request)
-            .retrieve()
-            .bodyToMono(ChatCompletionResponse::class.java)
-            .doOnNext {
-                log.debug { "Ответ OpenAI: $it" }
+//            .retrieve()
+//            .bodyToMono(ChatCompletionResponse::class.java)
+//            .doOnNext {
+//                log.debug { "Ответ OpenAI: $it" }
+//            }
+//            .doOnError { t -> log.error(t) { "Ошибка при запросе к OpenAI" } }
+//            .map {
+//                it.choices.first().message.content
+//            }
+            .exchangeToMono { resp ->
+                if (resp.statusCode().is2xxSuccessful) {
+                    resp.bodyToMono(ChatCompletionResponse::class.java)
+                } else {
+                    resp.bodyToMono(String::class.java)
+                        .flatMap { body ->
+                            log.error { "OpenAI 4xx/5xx: ${resp.statusCode().value()} body=$body" }
+                            Mono.error(
+                                WebClientResponseException.create(
+                                resp.statusCode().value(), "OpenAI error",
+                                resp.headers().asHttpHeaders(), body.toByteArray(), null
+                            ))
+                        }
+                }
             }
-            .doOnError { t -> log.error(t) { "Ошибка при запросе к OpenAI" } }
-            .map {
-                it.choices.first().message.content
-            }
+            .map { it.choices.first().message.content }
     }
 
 }
