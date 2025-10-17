@@ -1,7 +1,5 @@
 package ru.ai.assistant.infra.openapi
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -130,16 +128,13 @@ class OpenAISenderImpl(
 //
 //    """.trimIndent()
 
-    override fun chatWithGPT(prompt: String, knowledge: String): Mono<String> {
+    override fun chatWithGPT(prompt: List<Map<String, String>>, knowledge: String): Mono<String> {
 
 
         val request = mapOf(
             "model" to "gpt-4o-mini",
 //            "model" to "gpt-3.5-turbo",
-            "messages" to listOf(
-                mapOf("role" to "system", "content" to knowledge),
-                mapOf("role" to "user", "content" to prompt)
-            )
+            "messages" to prompt
         )
 
 //        log.debug { "chatWithGPT request ${jacksonObjectMapper().writeValueAsString(request).take(300)}" }

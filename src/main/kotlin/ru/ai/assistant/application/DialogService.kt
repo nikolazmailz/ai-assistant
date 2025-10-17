@@ -25,7 +25,6 @@ import ru.ai.assistant.domain.SourceDialogType
 import ru.ai.assistant.domain.TelegramUpdate
 import ru.ai.assistant.domain.systemprompt.PromptComponent
 import java.time.Instant
-import java.util.UUID
 
 @Service
 class DialogService(
@@ -105,10 +104,14 @@ class DialogService(
             dialogMetaInfoEntityService.getDialogMetaInfoById(dialogQueue.dialogId!!)
         )
 
-        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId)
-            .toList().map {
-                "${it.role}: ${it.payload} \n"
-            }.toString()
+        val dialogs = mutableListOf<Map<String, String>>()
+
+
+//        val dialogs =
+            dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId)
+            .toList().forEach {
+                    dialogs.add(mapOf("role" to "${it.role}", "content" to "${it.payload}"))
+            }
 
         auditLogRepository.save(
             AuditLogEntity(
@@ -120,6 +123,8 @@ class DialogService(
             )
         )
 
+//        dialogs.first()
+        dialogs.addFirst( mapOf("role" to "system", "content" to prompt))
         val responseAi = openAISender.chatWithGPT(dialogs, prompt).awaitSingleOrNull()
 
 //        val parseAiContent = parseAiContent(responseAi!!)
