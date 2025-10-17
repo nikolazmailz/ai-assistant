@@ -72,9 +72,19 @@ class DialogService(
             it.payload + "\n"
         }.toString()
 
+        auditLogRepository.save(
+            AuditLogEntity(
+                userId = dialogQueue.userId,
+                chatId = dialogQueue.chatId,
+                source = "System",
+                payloadTypeLog = PayloadTypeLog.TEXT,
+                payload = dialogs
+            )
+        )
+
         val responseAi = openAISender.chatWithGPT(dialogs, prompt).awaitSingleOrNull()
 
-        parseAiContent(responseAi!!)
+        val parseAiContent = parseAiContent(responseAi!!)
 
         auditLogRepository.save(
             AuditLogEntity(
@@ -83,33 +93,21 @@ class DialogService(
 //                sessionId = sessionId,
                 source = "AI",
                 payloadTypeLog = PayloadTypeLog.TEXT,
-                payload = responseAi
+                payload = jacksonObjectMapper().writeValueAsString(parseAiContent)
                 // id/createdAt/updatedAt — оставляем на DEFAULT в БД
             )
         )
 
-        dialogQueueRepository.save(
-            DialogQueue(
-                userId = dialogQueue.userId,
-                chatId = dialogQueue.chatId,
-                dialogId     = dialogQueue.dialogId,
-                status = QueueStatus.ERROR,
-                payload = responseAi,
-                scheduledAt = Instant.now().plusSeconds(5),
-                source = SourceDialogType.AI,
-                role = RoleType.ASSISTANT,
-            )
-        )
 
-        val answers: List<AnswerAI> = jacksonObjectMapper().readValue(
-            responseAi,
-            object : TypeReference<List<AnswerAI>>() {}
-        )
-        log.info { "DialogService answers $answers" }
+//        val answers: List<AnswerAI> = jacksonObjectMapper().readValue(
+//            responseAi,
+//            object : TypeReference<List<AnswerAI>>() {}
+//        )
+//        log.info { "DialogService answers $answers" }
 
         var fullAnswer = ""
 
-        for (answer in answers) {
+        for (answer in parseAiContent) {
             fullAnswer += answer.answer
 
             if (answer.sql != null && answer.sql != "") {
@@ -119,6 +117,20 @@ class DialogService(
                         val rawSqlServiceResult = rawSqlService.execute(answer.sql)
                         log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }
                     } catch (e: Exception) {
+
+                        dialogQueueRepository.save(
+                            DialogQueue(
+                                userId = dialogQueue.userId,
+                                chatId = dialogQueue.chatId,
+                                dialogId = dialogQueue.dialogId,
+                                status = QueueStatus.ERROR,
+                                payload = jacksonObjectMapper().writeValueAsString(answer),
+//                                scheduledAt = Instant.now().plusSeconds(5),
+                                source = SourceDialogType.AI,
+                                role = RoleType.ASSISTANT,
+                            )
+                        )
+
                         log.error(e) { "Ошибка при выполнении SQL" }
                     }
                 } else {
