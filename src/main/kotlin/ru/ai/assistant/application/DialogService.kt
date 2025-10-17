@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.toList
 import ru.ai.assistant.application.dto.AnswerAI
 import ru.ai.assistant.application.dto.AnswerAIType
 import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
@@ -68,9 +69,10 @@ class DialogService(
             dialogMetaInfoEntityService.getDialogMetaInfoById(dialogQueue.dialogId!!)
         )
 
-        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtDesc(dialogQueue.dialogId).map {
-            it.payload + "\n"
-        }.toString()
+        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtDesc(dialogQueue.dialogId)
+            .toList().map {
+                it.payload + "\n"
+            }.toString()
 
         auditLogRepository.save(
             AuditLogEntity(
@@ -154,7 +156,7 @@ class DialogService(
             }
         }
 
-        if(fullAnswer.isNotBlank()) {
+        if (fullAnswer.isNotBlank()) {
             telegramClient.sendMessage(dialogQueue.chatId, fullAnswer).awaitSingleOrNull()
         }
 
