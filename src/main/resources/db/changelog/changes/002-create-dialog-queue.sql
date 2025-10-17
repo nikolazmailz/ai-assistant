@@ -4,18 +4,18 @@
 -- Создание таблицы dialog_queue — очередь шагов обработки диалога
 
 -- 1. Enum для направления шага (входящее/исходящее)
-CREATE TYPE direction AS ENUM ('INBOUND', 'OUTBOUND');
+--CREATE TYPE direction AS ENUM ('INBOUND', 'OUTBOUND');
 
 -- 2. Enum для роли автора шага
 CREATE TYPE role_type AS ENUM ('USER', 'ASSISTANT', 'SYSTEM');
 
 -- 3. Enum для типа полезной нагрузки
-CREATE TYPE payload_type AS ENUM ('TEXT', 'VOICE', 'PHOTO', 'DOCUMENT', 'UNKNOWN');
+--CREATE TYPE payload_type AS ENUM ('TEXT', 'VOICE', 'PHOTO', 'DOCUMENT', 'UNKNOWN');
 
 -- Добавление статуса шага в очередь
 CREATE TYPE queue_status AS ENUM ('NEW','PROCESSING','WAITING','READY','SUCCESS','ERROR');
 
-CREATE TYPE step_kind AS ENUM ('REQUEST','RESPONSE','REPLY_TO_AI');
+--CREATE TYPE step_kind AS ENUM ('REQUEST','RESPONSE','REPLY_TO_AI');
 
 -- 4. Таблица dialog_queue
 CREATE TABLE dialog_queue (
@@ -28,12 +28,12 @@ CREATE TABLE dialog_queue (
     dialog_id       UUID,                                        -- логическая сессия, объединяющая серию шагов
     dialog_title    TEXT,                                        -- имя диалога
     source          TEXT NOT NULL DEFAULT 'telegram',            -- источник: telegram / web / api
-    direction       TEXT NOT NULL DEFAULT 'INBOUND',        -- направление шага: входящее/исходящее
+--    direction       TEXT NOT NULL DEFAULT 'INBOUND',        -- направление шага: входящее/исходящее
     role            TEXT NOT NULL DEFAULT 'USER',           -- роль автора шага: user / assistant / system
-    payload_type    TEXT NOT NULL DEFAULT 'TEXT',        -- тип полезной нагрузки: text / voice / photo / ...
-    step_kind       TEXT NOT NULL DEFAULT 'REQUEST',        -- тип шага: request / response / replyToLLM
-    next_step_hint  TEXT,                                        -- подсказка о предполагаемом следующем шаге
-    action_type     TEXT,                                        -- тип действия: send_reply / fetch_calendar / ...
+--    payload_type    TEXT NOT NULL DEFAULT 'TEXT',        -- тип полезной нагрузки: text / voice / photo / ...
+--    step_kind       TEXT NOT NULL DEFAULT 'REQUEST',        -- тип шага: request / response / replyToLLM
+--    next_step_hint  TEXT,                                        -- подсказка о предполагаемом следующем шаге
+--    action_type     TEXT,                                        -- тип действия: send_reply / fetch_calendar / ...
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),          -- когда шаг создан
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()           -- когда шаг обновлён
 );
