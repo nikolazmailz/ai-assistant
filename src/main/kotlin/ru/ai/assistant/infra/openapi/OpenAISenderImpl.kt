@@ -48,10 +48,38 @@ class OpenAISenderImpl(
 
     override fun chatWithGPT(prompt: List<Map<String, String>>, knowledge: String): Mono<String> {
 
+        val schema = mapOf(
+            "type" to "json_schema",
+            "json_schema" to mapOf(
+                "name" to "AnswerAIArray",
+                "strict" to true,
+                "schema" to mapOf(
+                    "\$schema" to "https://json-schema.org/draft/2020-12/schema",
+                    "title" to "AnswerAIArray",
+                    "type" to "array",
+                    "minItems" to 1,
+                    "items" to mapOf(
+                        "type" to "object",
+                        "additionalProperties" to false,
+                        "required" to listOf("answer", "action", "order"),
+                        "properties" to mapOf(
+                            "answer" to mapOf("type" to "string"),
+                            "sql" to mapOf("type" to listOf("string", "null"), "default" to null),
+                            "action" to mapOf("type" to "string", "enum" to listOf("RETURN", "SQL_FOR_AI")),
+                            "order" to mapOf("type" to "integer", "minimum" to 0),
+                            "master" to mapOf("type" to listOf("string", "null"), "default" to null)
+                        )
+                    )
+                )
+            )
+        )
+
         val request = mapOf(
             "model" to "gpt-4o-mini",
 //            "model" to "gpt-3.5-turbo",
-            "messages" to prompt
+            "messages" to prompt,
+            "temperature" to 0,
+            "response_format" to schema
         )
 
 //        "messages" to listOf(
