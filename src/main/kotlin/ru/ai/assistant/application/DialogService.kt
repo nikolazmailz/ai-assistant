@@ -110,7 +110,7 @@ class DialogService(
 //        val dialogs =
             dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId)
             .toList().forEach {
-                    dialogs.add(mapOf("role" to it.role.name, "content" to it.payload!!))
+                    dialogs.add(mapOf("role" to it.role.name.lowercase(), "content" to it.payload!!))
             }
 
         auditLogRepository.save(
