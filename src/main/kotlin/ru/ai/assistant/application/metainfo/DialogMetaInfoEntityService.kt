@@ -19,10 +19,18 @@ class DialogMetaInfoEntityService(
             activeDialog ?: dialogMetaInfoRepository.save(DialogMetaInfoEntity.create(userId))
         }
 
-
     suspend fun getDialogMetaInfoByUserId(userId: Long): DialogMetaInfoEntity =
         dialogMetaInfoRepository.findAllByUserIdAndIsActiveTrue(userId).toList().first()
 
     suspend fun getDialogMetaInfoById(id: UUID): DialogMetaInfoEntity =
         dialogMetaInfoRepository.findById(id) ?: throw RuntimeException("DialogMetaInfoEntity not found")
+
+    @Transactional
+    suspend fun setTitle(id: UUID, title: String) {
+        val dialogMetaInfo = dialogMetaInfoRepository.findById(id) ?: throw RuntimeException("DialogMetaInfoEntity not found")
+        val dialogMetaInfoUpdate = dialogMetaInfo.copy(
+            title = title
+        )
+        dialogMetaInfoRepository.save(dialogMetaInfoUpdate)
+    }
 }

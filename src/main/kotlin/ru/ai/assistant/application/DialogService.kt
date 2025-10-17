@@ -5,10 +5,9 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Service
 import ru.ai.assistant.domain.DialogQueue
 import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
+import ru.ai.assistant.application.audit.AuditService
 import ru.ai.assistant.application.dto.AnswerAI
 import ru.ai.assistant.application.dto.AnswerAIType
 import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
@@ -23,8 +22,10 @@ import ru.ai.assistant.domain.audit.PayloadTypeLog
 import ru.ai.assistant.infra.TelegramClient
 import ru.ai.assistant.application.security.sql.AnswerAiGuard
 import ru.ai.assistant.domain.SourceDialogType
+import ru.ai.assistant.domain.TelegramUpdate
 import ru.ai.assistant.domain.systemprompt.PromptComponent
 import java.time.Instant
+import java.util.UUID
 
 @Service
 class DialogService(
@@ -36,11 +37,46 @@ class DialogService(
     private val answerAiGuard: AnswerAiGuard,
     private val promptComponent: PromptComponent,
     private val dialogMetaInfoEntityService: DialogMetaInfoEntityService,
+    private val auditService: AuditService,
 ) {
 
     private val log = KotlinLogging.logger {}
 
-    suspend fun handleMsg(dialogQueue: DialogQueue) {
+    suspend fun handleMessage(update: TelegramUpdate) {
+        val message = update.message ?: return
+        val payload = message.text ?: return
+
+        log.debug { "update.message.text: $payload" }
+
+        auditService.log(message, payload = payload)
+
+        val dialogMetaInfo = dialogMetaInfoEntityService.getOrCreateDialogMetaInfo(userId = message.from!!.id).let {
+            if (it.title == null) {
+                val title = openAISender.defineTitleDialog(payload).awaitSingleOrNull()
+                log.debug { "defineTitleDialog $title" }
+                dialogMetaInfoEntityService.setTitle(it.id!!, title!!)
+                it.title = title
+            }
+            it
+        }
+
+        dialogQueueRepository.save(
+            DialogQueue(
+                userId = message.from.id,
+                chatId = message.chat.id,
+                dialogId = dialogMetaInfo.id,
+                dialogTitle = dialogMetaInfo.title,
+                status = QueueStatus.NEW,
+                payload = payload,
+                scheduledAt = Instant.now().plusSeconds(5),
+                source = SourceDialogType.TELEGRAM,
+                role = RoleType.USER,
+            )
+        )
+    }
+
+
+    suspend fun handlePollMsg(dialogQueue: DialogQueue) {
 
         // todo UseCase
 
@@ -71,7 +107,7 @@ class DialogService(
 
         val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId)
             .toList().map {
-               "${it.role}: ${it.payload} \n"
+                "${it.role}: ${it.payload} \n"
             }.toString()
 
         auditLogRepository.save(
@@ -86,7 +122,14 @@ class DialogService(
 
         val responseAi = openAISender.chatWithGPT(dialogs, prompt).awaitSingleOrNull()
 
-        val parseAiContent = parseAiContent(responseAi!!)
+//        val parseAiContent = parseAiContent(responseAi!!)
+
+
+        val answers: List<AnswerAI> = jacksonObjectMapper().readValue(
+            responseAi,
+            object : TypeReference<List<AnswerAI>>() {}
+        )
+        log.info { "DialogService answers $answers" }
 
         auditLogRepository.save(
             AuditLogEntity(
@@ -95,21 +138,14 @@ class DialogService(
 //                sessionId = sessionId,
                 source = "AI",
                 payloadTypeLog = PayloadTypeLog.TEXT,
-                payload = jacksonObjectMapper().writeValueAsString(parseAiContent)
+                payload = jacksonObjectMapper().writeValueAsString(answers)
                 // id/createdAt/updatedAt — оставляем на DEFAULT в БД
             )
         )
 
-
-//        val answers: List<AnswerAI> = jacksonObjectMapper().readValue(
-//            responseAi,
-//            object : TypeReference<List<AnswerAI>>() {}
-//        )
-//        log.info { "DialogService answers $answers" }
-
         var fullAnswer = ""
 
-        for (answer in parseAiContent) {
+        for (answer in answers) {
             fullAnswer += answer.answer
 
             var sqlResult = ""
@@ -172,13 +208,4 @@ class DialogService(
 
     }
 
-    fun parseAiContent(responseAi: String): List<AnswerAI> {
-        // срезаем ```json ... ``` или ``` ... ```
-        val cleaned = Regex("^```(?:json)?\\s*|\\s*```$", RegexOption.MULTILINE)
-            .replace(responseAi.trim(), "")
-            .trim()
-
-        val mapper = jacksonObjectMapper().findAndRegisterModules()
-        return mapper.readValue(cleaned)
-    }
 }

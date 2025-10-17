@@ -21,6 +21,28 @@ class OpenAISenderImpl(
 
     private val log = KotlinLogging.logger {}
 
+    override fun defineTitleDialog(prompt: String): Mono<String> {
+        val request = mapOf(
+//            "model" to "gpt-4o-mini",
+            "model" to "gpt-3.5-turbo",
+            "messages" to listOf(
+                mapOf("role" to "user", "content" to "Определи название для диалога : ${prompt.take(500)}")
+            )
+        )
+
+        return openaiWebClient.post()
+            .uri("/chat/completions")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(ChatCompletionResponse::class.java)
+            .doOnNext { log.info { "Ответ OpenAI: $it" } }
+            .doOnError { t -> log.error(t) { "Ошибка при запросе к OpenAI" } }
+            .map {
+                it.choices.first().message.content
+            }
+    }
+
 //    private val systemPrompt = """
 //        Ты полезный Telegram-ассистент. Отвечай кратко и по делу.
 //        ответ всегда присылай в формате JSON на основе объекта

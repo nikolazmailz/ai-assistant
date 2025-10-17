@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Mono
+import ru.ai.assistant.application.DialogService
 import ru.ai.assistant.application.handler.AiAssistantHandler
 import ru.ai.assistant.domain.TelegramUpdate
 
@@ -14,7 +15,8 @@ import ru.ai.assistant.domain.TelegramUpdate
 @RestController
 @RequestMapping("/tg")
 class TelegramWebhookController(
-    private val aiAssistantHandler: AiAssistantHandler
+    private val aiAssistantHandler: AiAssistantHandler,
+    private val dialogService: DialogService,
 ) {
     private val log = LoggerFactory.getLogger(javaClass)
 
@@ -22,7 +24,7 @@ class TelegramWebhookController(
     fun onUpdate(@RequestBody update: TelegramUpdate): Mono<ResponseEntity<Void>> {
         log.info("Got update: {}", update)
         return mono {
-            aiAssistantHandler.handleMessage(update)
+            dialogService.handleMessage(update)
             ResponseEntity.ok().build<Void>()
         }
     }

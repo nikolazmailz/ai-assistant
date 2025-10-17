@@ -48,6 +48,10 @@ class AiAssistantHandler (
 
         val dialogMetaInfo = dialogMetaInfoEntityService.getOrCreateDialogMetaInfo(userId = message.from.id)
 
+//        if(dialogMetaInfo.title == null) {
+//            // todo call llm for define title
+//        }
+
         dialogQueueRepository.save(
             DialogQueue(
                 userId = message.from.id,
@@ -74,7 +78,7 @@ class AiAssistantHandler (
             val id = requireNotNull(item.id) { "dialog_queue.id must not be null" }
             try {
                 // todo business logic
-                dialogService.handleMsg(item)
+                dialogService.handlePollMsg(item)
                 dialogQueueRepository.markSuccess(id)
                 sent++
             } catch (t: Throwable) {
