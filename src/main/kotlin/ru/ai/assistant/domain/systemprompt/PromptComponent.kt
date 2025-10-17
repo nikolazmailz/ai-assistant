@@ -39,7 +39,7 @@ class PromptComponent(
                 "${dialogInfo.levelOfResponseCompleteness?.levelPrompt} \n " +
                 "$globalPromptContent \n Твои знания: $knowledge \n" +
                 "".let {
-                    log.debug { "\n\n collectSystemPrompt $it \n\n" }
+                    log.debug { "\n\n collectSystemPrompt \n $it \n\n" }
                     it
                 }
     }
