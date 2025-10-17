@@ -88,7 +88,7 @@ class DialogService(
 
         dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId())
             .toList().forEach {
-                dialogs.add(mapOf("role" to it.role.name.lowercase(), "content" to it.payload!!))
+                dialogs.add(mapOf("role" to "\"${it.role.name.lowercase()}\"" , "content" to "\"${it.payload!!}\""))
             }
 
         auditService.logDialogQueueHistory(dialogQueue.userId, dialogQueue.chatId, dialogs)

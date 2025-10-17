@@ -7,6 +7,8 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 import ru.ai.assistant.application.openai.AISender
 import ru.ai.assistant.infra.openapi.dto.ChatCompletionResponse
+import kotlin.collections.take
+import kotlin.text.take
 
 @Service
 class OpenAISenderImpl(
@@ -23,6 +25,12 @@ class OpenAISenderImpl(
                 mapOf("role" to "user", "content" to "Определи название для диалога : ${prompt.take(500)}")
             )
         )
+
+        val x =  mapOf("role" to "user", "content" to "Определи название для диалога : ${prompt.take(500)}")
+
+        x.let { it ->
+            log.debug { it }
+        }
 
         return openaiWebClient.post()
             .uri("/chat/completions")
@@ -45,6 +53,12 @@ class OpenAISenderImpl(
 //            "model" to "gpt-3.5-turbo",
             "messages" to prompt
         )
+
+//        "messages" to listOf(
+//
+//        )
+
+        log.debug { "chatWithGPT request $request" }
 
         return openaiWebClient.post()
             .uri("/chat/completions")
