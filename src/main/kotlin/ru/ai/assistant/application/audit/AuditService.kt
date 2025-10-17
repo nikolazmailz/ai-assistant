@@ -44,15 +44,15 @@ class AuditService(
     }
 
 
-    suspend fun logAnswersAi(userId: Long, chatId: Long, answers: List<AnswerAI>) {
-        log.debug { "responseAi answers $answers" }
+    suspend fun logAnswersAi(userId: Long, chatId: Long, responseAi: String) {
+//        log.debug { "responseAi $responseAi" }
         auditLogRepository.save(
             AuditLogEntity(
                 userId = userId,
                 chatId = chatId,
                 source = "AI",
                 payloadTypeLog = PayloadTypeLog.TEXT,
-                payload = jacksonObjectMapper().writeValueAsString(answers)
+                payload = responseAi
             )
         )
     }

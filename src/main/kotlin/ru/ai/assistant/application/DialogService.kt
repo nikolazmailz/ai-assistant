@@ -100,12 +100,14 @@ class DialogService(
 
         val responseAi = openAISender.chatWithGPT(dialogs, systemPrompt).awaitSingleOrNull()
 
+        auditService.logAnswersAi(dialogQueue.userId, dialogQueue.chatId, responseAi)
+
         val answers: List<AnswerAI> = jacksonObjectMapper().readValue(
             responseAi,
             object : TypeReference<List<AnswerAI>>() {}
         )
 
-        auditService.logAnswersAi(dialogQueue.userId, dialogQueue.chatId, answers)
+
 
         var collectAnswer = ""
         var collectResultSql = ""
