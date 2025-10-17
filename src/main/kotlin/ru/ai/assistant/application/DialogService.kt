@@ -5,6 +5,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Service
 import ru.ai.assistant.domain.DialogQueue
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.map
 import ru.ai.assistant.application.dto.AnswerAI
@@ -72,6 +73,8 @@ class DialogService(
         }.toString()
 
         val responseAi = openAISender.chatWithGPT(dialogs, prompt).awaitSingleOrNull()
+
+        parseAiContent(responseAi!!)
 
         auditLogRepository.save(
             AuditLogEntity(
@@ -145,5 +148,15 @@ class DialogService(
 
         log.debug { "fullAnswer $fullAnswer" }
 
+    }
+
+    fun parseAiContent(responseAi: String): List<AnswerAI> {
+        // срезаем ```json ... ``` или ``` ... ```
+        val cleaned = Regex("^```(?:json)?\\s*|\\s*```$", RegexOption.MULTILINE)
+            .replace(responseAi.trim(), "")
+            .trim()
+
+        val mapper = jacksonObjectMapper().findAndRegisterModules()
+        return mapper.readValue(cleaned)
     }
 }

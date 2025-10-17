@@ -1,5 +1,7 @@
 package ru.ai.assistant.infra.openapi
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
@@ -132,6 +134,16 @@ class OpenAISenderImpl(
             .doOnError { t -> log.error(t) { "Ошибка при запросе к OpenAI" } }
             .map {
                 it.choices.first().message.content
+
+//                fun parseAiContent(rawContent: String): List<AiItem> {
+                    // срезаем ```json ... ``` или ``` ... ```
+//                    val cleaned = Regex("^```(?:json)?\\s*|\\s*```$", RegexOption.MULTILINE)
+//                        .replace(it.choices.first().message.content.trim(), "")
+//                        .trim()
+
+//                    val mapper = jacksonObjectMapper().findAndRegisterModules()
+//                    mapper.readValue(cleaned)
+//                }
             }
     }
 

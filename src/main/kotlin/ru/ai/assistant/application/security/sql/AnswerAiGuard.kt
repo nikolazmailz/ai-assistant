@@ -1,5 +1,7 @@
 package ru.ai.assistant.application.security.sql
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.ai.assistant.application.dto.AnswerAI
@@ -110,4 +112,14 @@ class AnswerAiGuard {
     private val DELETE_FROM = Regex("""\bDELETE\s+FROM\b""", RegexOption.IGNORE_CASE)
 //    private val UPDATE_NO_WHERE = Regex("""\bUPDATE\b(?![\s\S]*\bWHERE\b)""", RegexOption.IGNORE_CASE)
 
+
+    fun parseAiContent(responseAi: String): List<AnswerAI> {
+        // срезаем ```json ... ``` или ``` ... ```
+        val cleaned = Regex("^```(?:json)?\\s*|\\s*```$", RegexOption.MULTILINE)
+            .replace(responseAi.trim(), "")
+            .trim()
+
+        val mapper = jacksonObjectMapper().findAndRegisterModules()
+        return mapper.readValue(cleaned)
+    }
 }
