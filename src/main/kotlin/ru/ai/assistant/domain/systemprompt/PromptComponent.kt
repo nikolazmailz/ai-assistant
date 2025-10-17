@@ -1,5 +1,6 @@
 package ru.ai.assistant.domain.systemprompt
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 import ru.ai.assistant.db.RawSqlService
@@ -24,10 +25,11 @@ class PromptComponent(
     private val rawSqlService: RawSqlService,
 ) {
 
+    private val log = KotlinLogging.logger {}
+
     suspend fun collectSystemPrompt(dialogInfo: DialogMetaInfoEntity): String {
 
         val dialogInfoPrompt = createDialogInfoPrompt(dialogInfo)
-
         val globalPrompt = systemPromptRepository.findFirstByIsActiveTrue()!!
         val globalPromptContent = globalPrompt.content
         val knowledge = rawSqlService.execute(SqlScript.QUERY_ALL_DATA)
@@ -36,7 +38,10 @@ class PromptComponent(
                 "$WHO_AMI \n " +
                 "${dialogInfo.levelOfResponseCompleteness?.levelPrompt} \n " +
                 "$globalPromptContent \n Твои знания: $knowledge \n" +
-                ""
+                "".let {
+                    log.debug { "collectSystemPrompt $it" }
+                    it
+                }
     }
 
     private fun createDialogInfoPrompt(dialogInfo: DialogMetaInfoEntity): String = """ 
