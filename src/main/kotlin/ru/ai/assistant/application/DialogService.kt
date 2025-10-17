@@ -78,7 +78,7 @@ class DialogService(
                 chatId = dialogQueue.chatId,
                 source = "System",
                 payloadTypeLog = PayloadTypeLog.TEXT,
-                payload = dialogs
+                payload = jacksonObjectMapper().writeValueAsString(dialogs)
             )
         )
 
