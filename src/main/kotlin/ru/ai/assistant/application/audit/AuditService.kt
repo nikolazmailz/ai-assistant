@@ -3,12 +3,10 @@ package ru.ai.assistant.application.audit
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
-import ru.ai.assistant.application.dto.AnswerAI
 import ru.ai.assistant.domain.TelegramMessage
 import ru.ai.assistant.domain.audit.AuditLogEntity
 import ru.ai.assistant.domain.audit.AuditLogRepository
 import ru.ai.assistant.domain.audit.PayloadTypeLog
-import java.util.UUID
 
 @Service
 class AuditService(
