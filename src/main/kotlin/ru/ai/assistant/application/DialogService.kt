@@ -112,7 +112,7 @@ class DialogService(
 
             if (answer.sql != null && answer.sql != "") {
 
-                if (!answerAiGuard.sqlValidate(answer)) {
+                if (answerAiGuard.sqlValidate(answer)) {
                     try {
                         val rawSqlServiceResult = rawSqlService.execute(answer.sql)
                         log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }

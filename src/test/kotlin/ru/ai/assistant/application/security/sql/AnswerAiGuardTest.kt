@@ -39,13 +39,22 @@ class AnswerAiGuardTest : StringSpec({
 
 
     "Error UseCase 2" {
-        val answer = "[\n" +
-                "    {\n" +
-                "        \"answer\": \"Диалог не имеет заголовка. Предлагаю установить название: 'Общий разговор'.\",\n" +
-                "        \"sql\": \"UPDATE dialog_metainfo SET title = 'Общий разговор' WHERE user_id = 167548610 AND dialog_id = '650c4e0f-4875-45d1-ae94-1cdc315e8ca0';\",\n" +
-                "        \"action\": \"RETURN\"\n" +
-                "    }\n" +
-                "]"
+        val answer = """
+            [
+                {
+                    "answer": "Название диалога обновлено.",
+                    "sql": "UPDATE dialog_metainfo SET title = 'Обновление диалога' WHERE id = '5742d52d-8874-4894-b049-f2d46b2d314a';",
+                    "action": "SQL_FOR_AI",
+                    "order": 1
+                },
+                {
+                    "answer": "",
+                    "sql": "",
+                    "action": "RETURN",
+                    "order": 2
+                }
+            ]
+        """.trimIndent()
 
 
        val aiAnswer = guard.parseAiContent(answer)
