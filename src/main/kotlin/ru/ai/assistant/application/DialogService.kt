@@ -69,9 +69,9 @@ class DialogService(
             dialogMetaInfoEntityService.getDialogMetaInfoById(dialogQueue.dialogId!!)
         )
 
-        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtDesc(dialogQueue.dialogId)
+        val dialogs = dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId)
             .toList().map {
-                it.payload + "\n"
+               "${it.role}: ${it.payload} + \n"
             }.toString()
 
         auditLogRepository.save(
@@ -112,12 +112,18 @@ class DialogService(
         for (answer in parseAiContent) {
             fullAnswer += answer.answer
 
+            var sqlResult = ""
+
             if (answer.sql != null && answer.sql != "") {
 
                 if (answerAiGuard.sqlValidate(answer)) {
+
                     try {
                         val rawSqlServiceResult = rawSqlService.execute(answer.sql)
                         log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }
+
+                        sqlResult += "${jacksonObjectMapper().writeValueAsString(rawSqlServiceResult)} \n\n"
+
                     } catch (e: Exception) {
 
                         dialogQueueRepository.save(
@@ -138,6 +144,7 @@ class DialogService(
                 } else {
                     log.debug { "answerAiGuard.sqlValidat false by ${answer.sql}" }
                 }
+
             }
 
             if (answer.action == AnswerAIType.SQL_FOR_AI) {
@@ -147,13 +154,14 @@ class DialogService(
                         chatId = dialogQueue.chatId,
                         dialogId = dialogQueue.dialogId,
                         status = QueueStatus.NEW,
-                        payload = jacksonObjectMapper().writeValueAsString(answer),
+                        payload = "SQL_FOR_AI result $sqlResult",
                         scheduledAt = Instant.now().plusSeconds(5),
                         source = SourceDialogType.AI,
                         role = RoleType.ASSISTANT
                     )
                 )
             }
+
         }
 
         if (fullAnswer.isNotBlank()) {
