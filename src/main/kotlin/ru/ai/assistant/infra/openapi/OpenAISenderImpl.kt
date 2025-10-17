@@ -53,7 +53,7 @@ class OpenAISenderImpl(
             .retrieve()
             .bodyToMono(ChatCompletionResponse::class.java)
             .doOnNext {
-//                log.debug { "Ответ OpenAI: $it" }
+                log.debug { "Ответ OpenAI: $it" }
             }
             .doOnError { t -> log.error(t) { "Ошибка при запросе к OpenAI" } }
             .map {
