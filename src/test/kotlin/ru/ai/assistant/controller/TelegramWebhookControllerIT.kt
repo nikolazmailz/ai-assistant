@@ -1,6 +1,5 @@
 package ru.ai.assistant.controller
 
-import com.ninjasquad.springmockk.MockkBean
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.just
