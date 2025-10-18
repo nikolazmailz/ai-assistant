@@ -2,35 +2,23 @@ package ru.ai.assistant.infra.openapi
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.extensions.spring.SpringExtension
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
+import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
-import ru.ai.assistant.TestWebClientConfig
+import ru.ai.assistant.BaseIT
 import java.util.concurrent.TimeUnit
 
-@SpringBootTest(
-    classes = [
-        TestWebClientConfig::class,
-        OpenAISenderImpl::class
-    ],
-    properties = [
-        "spring.main.allow-bean-definition-overriding=true"
-    ]
-)
-@ActiveProfiles("test")
 class OpenAISenderImplIT @Autowired constructor(
-    private val openAISender: OpenAISenderImpl,
-    private val mockServer: MockWebServer
-) : ShouldSpec({
+    private val mockServer: MockWebServer,
+    private val webClient: WebClient
+) : BaseIT({
 
     val objectMapper = jacksonObjectMapper()
+    val openAISender = OpenAISenderImpl(webClient)
 
     should("define dialog title using OpenAI response") {
         val expectedContent = "Диалог о погоде"
@@ -90,8 +78,6 @@ class OpenAISenderImplIT @Autowired constructor(
         }
     }
 }) {
-    override fun extensions() = listOf(SpringExtension)
-
     private fun successfulResponse(content: String) =
         MockResponse()
             .setResponseCode(200)
