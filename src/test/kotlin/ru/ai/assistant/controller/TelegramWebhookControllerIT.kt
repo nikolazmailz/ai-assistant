@@ -15,13 +15,11 @@ import ru.ai.assistant.domain.TelegramUpdate
 import ru.ai.assistant.domain.TelegramUser
 
 class TelegramWebhookControllerIT(
-    private val dialogService: DialogService
-) : BaseIT() {
-
+    private val dialogService: DialogService,
     @Autowired
-    private lateinit var webTestClient: WebTestClient
+    private val webTestClient: WebTestClient
+) : BaseIT( {
 
-    init {
         {
             should("delegate update handling to dialog service and respond with OK") {
                 val update = TelegramUpdate(
@@ -49,11 +47,11 @@ class TelegramWebhookControllerIT(
                     .bodyValue(update)
                     .exchange()
                     .expectStatus().isOk
-                    .expectBody<Void>()
-                    .isEmpty
+                    .expectBody()
+                    .isEmpty()
 
                 coVerify(exactly = 1) { dialogService.handleMessage(update) }
             }
         }
-    }
-}
+
+})
