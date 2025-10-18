@@ -104,7 +104,9 @@ class OpenAISenderImpl(
 //            }
             .exchangeToMono { resp ->
                 if (resp.statusCode().is2xxSuccessful) {
-                    resp.bodyToMono(ChatCompletionResponse::class.java)
+                    resp.bodyToMono(ChatCompletionResponse::class.java).doOnNext {
+                        log.debug { "Ответ OpenAI: $it" }
+                    }
                 } else {
                     resp.bodyToMono(String::class.java)
                         .flatMap { body ->

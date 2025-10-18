@@ -1,0 +1,62 @@
+[
+  {
+    "role": "user",
+    "content": "/start"
+  },
+  {
+    "role": "user",
+    "content": "Ну что начнем"
+  },
+  {
+    "role": "user",
+    "content": "Ну что начнем"
+  },
+  {
+    "role": "assistant",
+    "content": "Начнем наше приключение! Какую задачу вы хотите решить первым делом?"
+  },
+  {
+    "role": "assistant",
+    "content": "Начнем наше приключение! Какую задачу вы хотите решить первым делом?"
+  },
+  {
+    "role": "user",
+    "content": "покажи всю истоию нашего диалога"
+  },
+  {
+    "role": "assistant",
+    "content": "История диалога пока отсутствует."
+  },
+  {
+    "role": "user",
+    "content": "покажи какие таблицы знаешь"
+  },
+  {
+    "role": "assistant",
+    "content": "Я знаю следующие таблицы: dialog_metainfo, dialog_queue, system_prompt."
+  },
+  {
+    "role": "user",
+    "content": "покажи историю диалога в dialog_queue"
+  },
+  {
+    "role": "assistant",
+    "content": "История диалога в таблице dialog_queue отсутствует."
+  },
+  {
+    "role": "user",
+    "content": "покажи какие диалоги есть"
+  },
+  {
+    "role": "assistant",
+    "content": "{\"answer\":\"Диалоги отсутствуют.\",\"sql\":\"SELECT * FROM dialog_metainfo WHERE user_id = 167548610 AND is_active = true;\",\"action\":\"SQL_FOR_AI\",\"order\":1,\"master\":null}"
+  },
+  {
+    "role": "assistant",
+    "content": "Диалоги отсутствуют.Диалоги отсутствуют."
+  },
+  {
+    "role": "user",
+    "content": "Какое сегодня число?"
+  }
+]

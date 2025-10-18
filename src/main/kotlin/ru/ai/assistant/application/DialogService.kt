@@ -107,8 +107,6 @@ class DialogService(
             object : TypeReference<List<AnswerAI>>() {}
         )
 
-
-
         var collectAnswer = ""
         var collectResultSql = ""
 
