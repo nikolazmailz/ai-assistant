@@ -3,7 +3,6 @@ package ru.ai.assistant.application.security.sql
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.booleans.shouldBeTrue
 import ru.ai.assistant.application.dto.AnswerAI
-import ru.ai.assistant.application.dto.AnswerAIType
 
 class AnswerAiGuardTest : StringSpec({
 
@@ -12,7 +11,6 @@ class AnswerAiGuardTest : StringSpec({
     fun ai(sql: String, master: String? = null) = AnswerAI(
         answer = "",
         sql = sql,
-        action = AnswerAIType.RETURN,
         order = 1,
         master = master
     )
@@ -44,13 +42,11 @@ class AnswerAiGuardTest : StringSpec({
                 {
                     "answer": "Название диалога обновлено.",
                     "sql": "UPDATE dialog_metainfo SET title = 'Обновление диалога' WHERE id = '5742d52d-8874-4894-b049-f2d46b2d314a';",
-                    "action": "SQL_FOR_AI",
                     "order": 1
                 },
                 {
                     "answer": "",
                     "sql": "",
-                    "action": "RETURN",
                     "order": 2
                 }
             ]

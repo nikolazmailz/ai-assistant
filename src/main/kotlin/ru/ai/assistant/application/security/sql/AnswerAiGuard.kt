@@ -26,6 +26,7 @@ class AnswerAiGuard {
         }
     }
 
+
     /** Валидирует список; собирает индексы опасных элементов. */
     suspend fun validateAll(list: List<AnswerAI>): Boolean {
         val bad = list.mapIndexedNotNull { idx, ai ->

@@ -29,7 +29,7 @@ class AuditService(
     }
 
     suspend fun logDialogQueueHistory(userId: Long, chatId: Long, dialogs: List<Map<String, String>>) {
-        log.debug { "DialogService answers ${jacksonObjectMapper().writeValueAsString(dialogs)}" }
+//        log.debug { "DialogService answers ${jacksonObjectMapper().writeValueAsString(dialogs)}" }
         auditLogRepository.save(
             AuditLogEntity(
                 userId = userId,

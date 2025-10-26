@@ -77,13 +77,14 @@ class OpenAISenderImplIT @Autowired constructor(
             openAISender.chatWithGPT(emptyList(), knowledge = "").block()
         }
     }
-}) {
-    private fun successfulResponse(content: String) =
-        MockResponse()
-            .setResponseCode(200)
-            .setHeader("Content-Type", "application/json")
-            .setBody(
-                """
+})
+
+private fun successfulResponse(content: String) =
+    MockResponse()
+        .setResponseCode(200)
+        .setHeader("Content-Type", "application/json")
+        .setBody(
+            """
                 {
                   "object": "chat.completion",
                   "id": "chatcmpl-123",
@@ -122,5 +123,5 @@ class OpenAISenderImplIT @Autowired constructor(
                   "response_format": null
                 }
                 """.trimIndent()
-            )
-}
+        )
+
