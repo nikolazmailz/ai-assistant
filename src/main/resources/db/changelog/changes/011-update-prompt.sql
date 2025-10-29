@@ -8,7 +8,7 @@ SET is_active = FALSE
 WHERE name = 'default_system_prompt';
 
 INSERT INTO system_prompt (name, description, prompt, is_active)
-SELECT
+VALUES(
     'answer_ai_list_json',
     'Промпт для LLM: всегда возвращать ответ в виде JSON-массива List<AnswerAI>',
     'Всегда отвечает строго в формате JSON-массива.
@@ -48,8 +48,6 @@ SELECT
 - order — порядок обработки сообщения.
 - master — не заполняй если не услышишь фразу мастер кунг-фу, иначе заполни false.',
     TRUE
-WHERE NOT EXISTS (
-    SELECT 1 FROM system_prompt WHERE name = 'answer_ai_list_json'
 );
 
 --rollback
