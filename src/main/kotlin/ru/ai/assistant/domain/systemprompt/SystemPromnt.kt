@@ -15,7 +15,7 @@ data class SystemPrompt(
 
     val description: String? = null,
 
-    val content: String,
+    val prompt: String,
 
     @Column("created_at")
     val createdAt: OffsetDateTime? = null,

@@ -27,11 +27,11 @@ class OpenAISenderImpl(
             )
         )
 
-        val x =  mapOf("role" to "user", "content" to "Определи название для диалога : ${prompt.take(500)}")
+//        val x =  mapOf("role" to "user", "content" to "Определи название для диалога : ${prompt.take(500)}")
 
-        x.let { it ->
-            log.debug { it }
-        }
+//        x.let { it ->
+//            log.debug { it }
+//        }
 
         return openaiWebClient.post()
             .uri("/chat/completions")
@@ -87,7 +87,7 @@ class OpenAISenderImpl(
 //
 //        )
 
-        log.debug { "chatWithGPT request $request" }
+//        log.debug { "chatWithGPT request $request" }
 
         return openaiWebClient.post()
             .uri("/chat/completions")

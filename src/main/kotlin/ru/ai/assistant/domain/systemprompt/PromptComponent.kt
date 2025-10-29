@@ -2,7 +2,6 @@ package ru.ai.assistant.domain.systemprompt
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Mono
 import ru.ai.assistant.db.RawSqlService
 import ru.ai.assistant.db.SqlScript
 import ru.ai.assistant.domain.metainfo.DialogMetaInfoEntity
@@ -31,7 +30,7 @@ class PromptComponent(
 
         val dialogInfoPrompt = createDialogInfoPrompt(dialogInfo)
         val globalPrompt = systemPromptRepository.findFirstByIsActiveTrue()!!
-        val globalPromptContent = globalPrompt.content
+        val globalPromptContent = globalPrompt.prompt
         val knowledge = rawSqlService.execute(SqlScript.QUERY_ALL_DATA)
 
         val systemPrompt = "$dialogInfoPrompt \n " +

@@ -15,3 +15,7 @@ databaseChangeLog:
       file: db/changelog/changes/008-alter-dialog_metainfo_title_not_null.sql
   - include:
       file: db/changelog/changes/009-remove-old-dialog-queue-columns.sql
+  - include:
+      file: db/changelog/changes/010-rename-content-to-prompt.sql
+  - include:
+      file: db/changelog/changes/011-update-prompt.sql
