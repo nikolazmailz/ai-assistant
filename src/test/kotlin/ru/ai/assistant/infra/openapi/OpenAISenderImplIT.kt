@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import ru.ai.assistant.BaseIT
+import ru.ai.assistant.utils.JacksonObjectMapper
 import java.util.concurrent.TimeUnit
 
 class OpenAISenderImplIT @Autowired constructor(
@@ -17,7 +18,7 @@ class OpenAISenderImplIT @Autowired constructor(
     private val webClient: WebClient
 ) : BaseIT({
 
-    val objectMapper = jacksonObjectMapper()
+    val objectMapper = JacksonObjectMapper.instance
     val openAISender = OpenAISenderImpl(webClient)
 
     should("define dialog title using OpenAI response") {

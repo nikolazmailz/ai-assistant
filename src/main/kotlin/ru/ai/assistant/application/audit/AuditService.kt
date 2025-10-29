@@ -7,6 +7,7 @@ import ru.ai.assistant.domain.TelegramMessage
 import ru.ai.assistant.domain.audit.AuditLogEntity
 import ru.ai.assistant.domain.audit.AuditLogRepository
 import ru.ai.assistant.domain.audit.PayloadTypeLog
+import ru.ai.assistant.utils.JacksonObjectMapper
 
 @Service
 class AuditService(
@@ -36,7 +37,7 @@ class AuditService(
                 chatId = chatId,
                 source = "System",
                 payloadTypeLog = PayloadTypeLog.TEXT,
-                payload = jacksonObjectMapper().writeValueAsString(dialogs)
+                payload = JacksonObjectMapper.instance.writeValueAsString(dialogs)
             )
         )
     }

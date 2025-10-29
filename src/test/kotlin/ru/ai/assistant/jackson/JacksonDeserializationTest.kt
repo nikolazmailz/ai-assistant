@@ -6,10 +6,11 @@ import com.fasterxml.jackson.core.type.TypeReference
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import ru.ai.assistant.application.dto.AnswerAI
+import ru.ai.assistant.utils.JacksonObjectMapper
 
 class JacksonDeserializationTest : StringSpec({
 
-    val objectMapper = jacksonObjectMapper()
+    val objectMapper = JacksonObjectMapper.instance
 
 //    "должен корректно десериализовать список AnswerAI" {
 //        val json = this::class.java.getResource("/data/jackson/request.json")!!.readText()

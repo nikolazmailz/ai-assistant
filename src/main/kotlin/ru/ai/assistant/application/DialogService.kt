@@ -21,6 +21,7 @@ import ru.ai.assistant.application.security.sql.AnswerAiGuard
 import ru.ai.assistant.domain.SourceDialogType
 import ru.ai.assistant.domain.TelegramUpdate
 import ru.ai.assistant.domain.systemprompt.PromptComponent
+import ru.ai.assistant.utils.JacksonObjectMapper
 import java.time.Instant
 
 @Service
@@ -103,7 +104,7 @@ class DialogService(
         auditService.logAnswersAi(dialogQueue.userId, dialogQueue.chatId, responseAi)
 
 
-        val answers: List<AnswerAI> = jacksonObjectMapper().readValue(
+        val answers: List<AnswerAI> = JacksonObjectMapper.instance.readValue(
             responseAi,
             object : TypeReference<List<AnswerAI>>() {}
         )
@@ -119,7 +120,7 @@ class DialogService(
                     try {
                         val rawSqlServiceResult = rawSqlService.executeSmart(answer.sql)
                         log.debug { "rawSqlServiceResult: $rawSqlServiceResult" }
-                        collectResultSql += "${jacksonObjectMapper().writeValueAsString(rawSqlServiceResult)} \n"
+                        collectResultSql += "${JacksonObjectMapper.instance.writeValueAsString(rawSqlServiceResult)} \n"
                     } catch (e: Exception) {
                         dialogQueueRepository.save(
                             DialogQueue(
@@ -127,7 +128,7 @@ class DialogService(
                                 chatId = dialogQueue.chatId,
                                 dialogId = dialogQueue.dialogId,
                                 status = QueueStatus.ERROR,
-                                payload = jacksonObjectMapper().writeValueAsString(answer),
+                                payload = JacksonObjectMapper.instance.writeValueAsString(answer),
                                 source = SourceDialogType.AI,
                                 role = RoleType.ASSISTANT,
                             )

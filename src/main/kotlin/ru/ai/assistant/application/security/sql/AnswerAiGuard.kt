@@ -6,6 +6,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import ru.ai.assistant.application.dto.AnswerAI
 import ru.ai.assistant.application.security.sql.dto.Mode
+import ru.ai.assistant.utils.JacksonObjectMapper
 
 @Component
 class AnswerAiGuard {
@@ -120,7 +121,7 @@ class AnswerAiGuard {
             .replace(responseAi.trim(), "")
             .trim()
 
-        val mapper = jacksonObjectMapper().findAndRegisterModules()
+        val mapper = JacksonObjectMapper.instance.findAndRegisterModules()
         return mapper.readValue(cleaned)
     }
 }
