@@ -74,7 +74,7 @@ class OpenAISenderImpl(
                             "items" to mapOf(
                                 "type" to "object",
                                 "additionalProperties" to false,
-                                "required" to listOf("answer", "order"),
+                                "required" to listOf("answer", "sql", "order", "master"),
                                 "properties" to mapOf(
                                     "answer" to mapOf("type" to "string"),
                                     "sql" to mapOf("type" to listOf("string", "null"), "default" to null),
