@@ -1,6 +1,5 @@
 package ru.ai.assistant.application
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Service
 import ru.ai.assistant.domain.DialogQueue
@@ -100,7 +99,7 @@ class DialogService(
         auditService.logDialogQueueHistory(dialogQueue.userId, dialogQueue.chatId, dialogs)
 
 
-        val responseAi = openAISender.chatWithGPT(dialogs, systemPrompt).awaitSingleOrNull()
+        val responseAi = openAISender.chatWithGPT(dialogs, systemPrompt, dialogQueue.userId, dialogQueue.chatId).awaitSingleOrNull()
         auditService.logAnswersAi(dialogQueue.userId, dialogQueue.chatId, responseAi)
 
 

@@ -1,19 +1,22 @@
 package ru.ai.assistant.infra.openapi
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.reactor.mono
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
+import ru.ai.assistant.application.audit.AuditService
 import ru.ai.assistant.application.openai.AISender
 import ru.ai.assistant.infra.openapi.dto.ChatCompletionResponse
-import kotlin.collections.take
+import ru.ai.assistant.utils.JacksonObjectMapper
 import kotlin.text.take
 
 @Service
 class OpenAISenderImpl(
     private val openaiWebClient: WebClient,
+    private val auditService: AuditService,
 ) : AISender {
 
     private val log = KotlinLogging.logger {}
@@ -47,7 +50,12 @@ class OpenAISenderImpl(
     }
 
 
-    override fun chatWithGPT(prompt: List<Map<String, String>>, knowledge: String): Mono<String> {
+    override fun chatWithGPT(
+        prompt: List<Map<String, String>>,
+        knowledge: String,
+        userId: Long,
+        chatId: Long
+    ): Mono<String> {
 
         val schema = mapOf(
             "type" to "json_schema",
@@ -88,6 +96,10 @@ class OpenAISenderImpl(
 //        )
 
 //        log.debug { "chatWithGPT request $request" }
+        mono {
+            auditService.logRequestToAi(userId, chatId, JacksonObjectMapper.instance.writeValueAsString(request))
+        }.subscribe()
+
 
         return openaiWebClient.post()
             .uri("/chat/completions")
@@ -113,9 +125,10 @@ class OpenAISenderImpl(
                             log.error { "OpenAI 4xx/5xx: ${resp.statusCode().value()} body=$body" }
                             Mono.error(
                                 WebClientResponseException.create(
-                                resp.statusCode().value(), "OpenAI error",
-                                resp.headers().asHttpHeaders(), body.toByteArray(), null
-                            ))
+                                    resp.statusCode().value(), "OpenAI error",
+                                    resp.headers().asHttpHeaders(), body.toByteArray(), null
+                                )
+                            )
                         }
                 }
             }

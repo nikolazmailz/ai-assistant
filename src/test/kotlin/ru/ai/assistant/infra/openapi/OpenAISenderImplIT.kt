@@ -1,25 +1,29 @@
 package ru.ai.assistant.infra.openapi
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.mockk.mockk
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import ru.ai.assistant.BaseIT
+import ru.ai.assistant.application.audit.AuditService
 import ru.ai.assistant.utils.JacksonObjectMapper
 import java.util.concurrent.TimeUnit
 
 class OpenAISenderImplIT @Autowired constructor(
     private val mockServer: MockWebServer,
-    private val webClient: WebClient
+    private val webClient: WebClient,
+
 ) : BaseIT({
 
+    val auditService = mockk<AuditService>()
+
     val objectMapper = JacksonObjectMapper.instance
-    val openAISender = OpenAISenderImpl(webClient)
+    val openAISender = OpenAISenderImpl(webClient, auditService)
 
     should("define dialog title using OpenAI response") {
         val expectedContent = "Диалог о погоде"
@@ -50,7 +54,7 @@ class OpenAISenderImplIT @Autowired constructor(
             mapOf("role" to "user", "content" to "Привет")
         )
 
-        val result = openAISender.chatWithGPT(prompt, knowledge = "").block()
+        val result = openAISender.chatWithGPT(prompt, knowledge = "", 0, 0).block()
 
         result shouldBe expectedContent
 
@@ -75,7 +79,7 @@ class OpenAISenderImplIT @Autowired constructor(
         )
 
         shouldThrow<WebClientResponseException> {
-            openAISender.chatWithGPT(emptyList(), knowledge = "").block()
+            openAISender.chatWithGPT(emptyList(), knowledge = "", 0, 0).block()
         }
     }
 })

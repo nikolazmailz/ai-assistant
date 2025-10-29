@@ -14,6 +14,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import ru.ai.assistant.application.DialogService
+import ru.ai.assistant.application.audit.AuditService
 import ru.ai.assistant.application.handler.AiAssistantHandler
 import ru.ai.assistant.infra.openapi.OpenAISenderImpl
 
@@ -34,6 +35,7 @@ import ru.ai.assistant.infra.openapi.OpenAISenderImpl
     MockkBean(AiAssistantHandler::class),
     MockkBean(OpenAISenderImpl::class),
     MockkBean(DialogService::class),
+//    MockkBean(AuditService::class),
 )
 abstract class BaseIT(body: ShouldSpec.() -> Unit = {}) : ShouldSpec(body) {
 
