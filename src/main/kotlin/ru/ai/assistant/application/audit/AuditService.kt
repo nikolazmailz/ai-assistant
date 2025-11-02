@@ -21,7 +21,7 @@ class AuditService(
             AuditLogEntity(
                 userId = message.from?.id!!,
                 chatId = message.chat.id,
-                source = "user",
+                source = "logUserText",
                 payloadTypeLog = typeLog ?: PayloadTypeLog.TEXT,
                 payload = payload
             )
@@ -35,7 +35,7 @@ class AuditService(
             AuditLogEntity(
                 userId = userId,
                 chatId = chatId,
-                source = "System",
+                source = "logDialogQueueHistory",
                 payloadTypeLog = PayloadTypeLog.TEXT,
                 payload = JacksonObjectMapper.instance.writeValueAsString(dialogs)
             )
@@ -47,7 +47,7 @@ class AuditService(
             AuditLogEntity(
                 userId = userId,
                 chatId = chatId,
-                source = "SYSTEM",
+                source = "logRequestToAi",
                 payloadTypeLog = PayloadTypeLog.TEXT,
                 payload = requestAi
             )
@@ -60,7 +60,7 @@ class AuditService(
             AuditLogEntity(
                 userId = userId,
                 chatId = chatId,
-                source = "AI",
+                source = "logAnswersAi",
                 payloadTypeLog = PayloadTypeLog.TEXT,
                 payload = responseAi
             )

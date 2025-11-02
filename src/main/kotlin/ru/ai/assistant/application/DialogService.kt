@@ -102,6 +102,7 @@ class DialogService(
 
 
         val responseAi = openAISender.chatWithGPT(dialogs, systemPrompt, dialogQueue.userId, dialogQueue.chatId).awaitSingleOrNull()
+
         auditService.logAnswersAi(dialogQueue.userId, dialogQueue.chatId, responseAi)
 
 //        val answers: List<AnswerAI> = JacksonObjectMapper.instance.readValue(
