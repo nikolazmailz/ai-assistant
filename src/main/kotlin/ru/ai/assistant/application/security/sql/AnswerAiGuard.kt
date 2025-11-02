@@ -60,7 +60,7 @@ class AnswerAiGuard {
 //            Mode.STRICT -> listOf(DROP_ANY, TRUNCATE, ALTER_DROP, DELETE_FROM).any { it.containsMatchIn(s) }
 //        }
 
-        val s = sanitizeSql(sql)
+//        val s = sanitizeSql(sql)
         val rules = when (mode) {
             Mode.OFF -> emptyList()
             Mode.RELAXED -> listOf("DROP_ANY" to DROP_ANY, "TRUNCATE" to TRUNCATE, "ALTER_DROP" to ALTER_DROP)
@@ -68,12 +68,12 @@ class AnswerAiGuard {
         }
 
         for ((name, rx) in rules) {
-            if (rx.containsMatchIn(s)) {
-                log.warn { "SQL guard hit: rule=$name, mode=$mode, sanitized='${s.trim()}'" }
+            if (rx.containsMatchIn(sql)) {
+                log.warn { "SQL guard hit: rule=$name, mode=$mode, sanitized='${sql.trim()}'" }
                 return true
             }
         }
-        log.debug { "SQL guard passed: mode=$mode, sanitized='${s.trim()}'" }
+        log.debug { "SQL guard passed: mode=$mode, sanitized='${sql.trim()}'" }
         return false
     }
 
