@@ -21,6 +21,7 @@ import ru.ai.assistant.domain.SourceDialogType
 import ru.ai.assistant.domain.TelegramUpdate
 import ru.ai.assistant.domain.systemprompt.PromptComponent
 import ru.ai.assistant.utils.JacksonObjectMapper
+import java.sql.SQLException
 import java.time.Instant
 
 @Service
@@ -137,6 +138,7 @@ class DialogService(
                             )
                         )
                         log.error(e) { "Ошибка при выполнении SQL" }
+                        throw SQLException("не удалось выполнить rawSqlService.executeSmart")
                     }
                 } else {
                     log.debug { "answerAiGuard.sqlValidat false by ${answer.sql}" }
