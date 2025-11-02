@@ -3,11 +3,11 @@ package ru.ai.assistant.application
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Service
 import ru.ai.assistant.domain.DialogQueue
-import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.toList
 import ru.ai.assistant.application.audit.AuditService
-import ru.ai.assistant.application.dto.AnswerAI
+import ru.ai.assistant.application.dto.AnswerAIWrapper
 import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
 import ru.ai.assistant.application.openai.AISender
 import ru.ai.assistant.db.RawSqlService
@@ -102,16 +102,17 @@ class DialogService(
         val responseAi = openAISender.chatWithGPT(dialogs, systemPrompt, dialogQueue.userId, dialogQueue.chatId).awaitSingleOrNull()
         auditService.logAnswersAi(dialogQueue.userId, dialogQueue.chatId, responseAi)
 
+//        val answers: List<AnswerAI> = JacksonObjectMapper.instance.readValue(
+//            responseAi,
+//            object : TypeReference<List<AnswerAI>>() {}
+//        )
 
-        val answers: List<AnswerAI> = JacksonObjectMapper.instance.readValue(
-            responseAi,
-            object : TypeReference<List<AnswerAI>>() {}
-        )
+        val answers: AnswerAIWrapper = JacksonObjectMapper.instance.readValue<AnswerAIWrapper>(responseAi!!)
 
         var collectAnswer = ""
         var collectResultSql = ""
 
-        for (answer in answers) {
+        for (answer in answers.items) {
             collectAnswer += answer.answer
 
             if (answer.sql != null && answer.sql != "") {
