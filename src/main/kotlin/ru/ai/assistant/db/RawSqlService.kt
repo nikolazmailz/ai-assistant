@@ -28,29 +28,73 @@ class RawSqlService(
             .awaitSingle()
     }
 
-    suspend fun executeSmart(sql: String): Any {
-        return try {
-            val rows = template.databaseClient
-                .sql(sql)
-                .map { row, meta ->
-                    val result = linkedMapOf<String, Any?>()
-                    meta.columnMetadatas.forEachIndexed { i, cmd ->
-                        result[cmd.name] = row.get(i)
-                    }
-                    result
-                }
-                .all()
-                .collectList()
-                .awaitSingle()
+//    suspend fun executeSmart(sql: String): Any {
+//        return try {
+//            val rows = template.databaseClient
+//                .sql(sql)
+//                .map { row, meta ->
+//                    val result = linkedMapOf<String, Any?>()
+//                    meta.columnMetadatas.forEachIndexed { i, cmd ->
+//                        result[cmd.name] = row.get(i)
+//                    }
+//                    result
+//                }
+//                .all()
+//                .collectList()
+//                .awaitSingle()
+//
+//            if (rows.isNotEmpty()) {
+//                mapOf("type" to "rows", "rows" to rows)
+//            } else {
+//                val updated = template.databaseClient.sql(sql).fetch().rowsUpdated().awaitSingle()
+//                mapOf("type" to "rowsAffected", "rowsAffected" to updated)
+//            }
+//        } catch (e: Exception) {
+//            mapOf("type" to "error", "message" to e.message)
+//        }
+//    }
 
-            if (rows.isNotEmpty()) {
-                mapOf("type" to "rows", "rows" to rows)
-            } else {
-                val updated = template.databaseClient.sql(sql).fetch().rowsUpdated().awaitSingle()
-                mapOf("type" to "rowsAffected", "rowsAffected" to updated)
+
+    suspend fun executeSmart(sqlRaw: String): Any {
+        // 1) срежем ; и пробелы
+        val sql = sqlRaw.trim().trimEnd(';').trim()
+        val first = sql.takeWhile { !it.isWhitespace() }.uppercase()
+
+        return try {
+            when (first) {
+                "SELECT", "WITH", "VALUES", "SHOW", "EXPLAIN" -> {
+                    val rows = template.databaseClient
+                        .sql(sql)
+                        .map { row, meta ->
+                            buildMap<String, Any?> {
+                                meta.columnMetadatas.forEachIndexed { i, cmd ->
+                                    this[cmd.name] = row.get(i)
+                                }
+                            }
+                        }
+                        .all()
+                        .collectList()
+                        .awaitSingle()
+
+                    if (rows.isNotEmpty())
+                        mapOf("type" to "rows", "rows" to rows)
+                    else
+                        mapOf("type" to "rows", "rows" to emptyList<Map<String, Any?>>())
+                }
+                else -> {
+                    // DDL/DML: CREATE / ALTER / DROP / INSERT / UPDATE / DELETE / MERGE …
+                    val updated = template.databaseClient
+                        .sql(sql)
+                        .fetch()
+                        .rowsUpdated()
+                        .awaitSingle()
+
+                    mapOf("type" to "rowsAffected", "rowsAffected" to updated)
+                }
             }
         } catch (e: Exception) {
-            mapOf("type" to "error", "message" to e.message)
+            // Полезно логировать первопричину
+            mapOf("type" to "error", "message" to (e.cause?.message ?: e.message))
         }
     }
 }
