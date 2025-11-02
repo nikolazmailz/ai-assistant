@@ -39,8 +39,8 @@ class PromptComponent(
                 "$globalPromptContent \n Твои знания: $knowledge \n" +
                 ""
 
-        log.debug { "\n\n collectSystemPrompt \n" }
-        log.debug { "$systemPrompt \n\n" }
+//        log.debug { "\n\n collectSystemPrompt \n" }
+//        log.debug { "$systemPrompt \n\n" }
         return systemPrompt
     }
 

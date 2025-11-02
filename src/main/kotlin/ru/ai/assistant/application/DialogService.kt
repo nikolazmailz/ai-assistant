@@ -86,17 +86,19 @@ class DialogService(
 
         val dialogs = mutableListOf<Map<String, String>>()
 
-        val systemPrompt = promptComponent.collectSystemPrompt(
-            dialogMetaInfoEntityService.getDialogMetaInfoById(dialogQueue.dialogId())
-        )
-        dialogs.addFirst(mapOf("role" to "system", "content" to systemPrompt))
-
         dialogQueueRepository.findAllByDialogIdOrderByCreatedAtAsc(dialogQueue.dialogId())
             .toList().forEach {
                 dialogs.add(mapOf("role" to it.role.name.lowercase() , "content" to it.payload!!))
             }
 
         auditService.logDialogQueueHistory(dialogQueue.userId, dialogQueue.chatId, dialogs)
+
+        log.debug { " \n findAllByDialogIdOrderByCreatedAtAsc \n $dialogs" }
+
+        val systemPrompt = promptComponent.collectSystemPrompt(
+            dialogMetaInfoEntityService.getDialogMetaInfoById(dialogQueue.dialogId())
+        )
+        dialogs.addFirst(mapOf("role" to "system", "content" to systemPrompt))
 
 
         val responseAi = openAISender.chatWithGPT(dialogs, systemPrompt, dialogQueue.userId, dialogQueue.chatId).awaitSingleOrNull()

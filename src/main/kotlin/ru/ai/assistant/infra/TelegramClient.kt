@@ -45,7 +45,7 @@ class TelegramClient(
         text: String,
         parseMode: ParseMode? = null
     ): Mono<Unit> {
-        log.info("")
+
         require(chatId > 0) { "chatId must be > 0" }
         require(text.isNotBlank()) { "text must be not blank" }
 

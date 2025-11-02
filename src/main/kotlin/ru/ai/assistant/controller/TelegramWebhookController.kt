@@ -22,7 +22,7 @@ class TelegramWebhookController(
 
     @PostMapping("/webhook")
     fun onUpdate(@RequestBody update: TelegramUpdate): Mono<ResponseEntity<Void>> {
-        log.info("Got update: {}", update)
+//        log.info("Got update: {}", update)
         return mono {
             dialogService.handleMessage(update)
             ResponseEntity.ok().build<Void>()
