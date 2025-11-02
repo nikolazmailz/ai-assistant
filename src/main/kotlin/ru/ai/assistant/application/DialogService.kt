@@ -6,6 +6,7 @@ import ru.ai.assistant.domain.DialogQueue
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.flow.toList
+import org.springframework.transaction.annotation.Transactional
 import ru.ai.assistant.application.audit.AuditService
 import ru.ai.assistant.application.dto.AnswerAIWrapper
 import ru.ai.assistant.application.metainfo.DialogMetaInfoEntityService
