@@ -132,13 +132,13 @@ class DialogService(
                                 chatId = dialogQueue.chatId,
                                 dialogId = dialogQueue.dialogId,
                                 status = QueueStatus.ERROR,
-                                payload = JacksonObjectMapper.instance.writeValueAsString(answer),
+                                payload = JacksonObjectMapper.instance.writeValueAsString(answer.answer),
                                 source = SourceDialogType.AI,
                                 role = RoleType.ASSISTANT,
                             )
                         )
                         log.error(e) { "Ошибка при выполнении SQL" }
-                        throw SQLException("не удалось выполнить rawSqlService.executeSmart")
+//                        throw SQLException("не удалось выполнить rawSqlService.executeSmart")
                     }
                 } else {
                     log.debug { "answerAiGuard.sqlValidat false by ${answer.sql}" }
