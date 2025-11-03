@@ -1,5 +1,6 @@
 package ru.ai.assistant.db
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
@@ -13,7 +14,8 @@ import reactor.core.Exceptions
 
 @Service
 class RawSqlService(
-    private val template: R2dbcEntityTemplate
+    private val template: R2dbcEntityTemplate,
+    private val txManager: org.springframework.r2dbc.connection.R2dbcTransactionManager
 ) {
 
     suspend fun execute(sql: String): List<Map<String, Any?>> {
@@ -103,6 +105,7 @@ class RawSqlService(
         } catch (e: Exception) {
             // Полезно логировать первопричину
 //            mapOf("type" to "error", "message" to (e.cause?.message ?: e.message))
+            log.error(e) { "Ошибка при executeSmart SQL" }
             toErrorPayload(e)
         }
     }
@@ -147,4 +150,5 @@ class RawSqlService(
         }.getOrNull()
     }
 
+    private val log = KotlinLogging.logger {}
 }
