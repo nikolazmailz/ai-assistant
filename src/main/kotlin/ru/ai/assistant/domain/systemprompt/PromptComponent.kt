@@ -46,10 +46,10 @@ class PromptComponent(
 
     private fun createDialogInfoPrompt(dialogInfo: DialogMetaInfoEntity): String = """ 
             {
-              "userId": "${dialogInfo.userId}",
-              "dialogId": "${dialogInfo.id}",
-              "dialogName": "${dialogInfo.title}",
-              "currentTime": "${OffsetDateTime.now()}"
+              "user_id": "${dialogInfo.userId}",
+              "dialog_id": "${dialogInfo.id}",
+              "dialog_name": "${dialogInfo.title}",
+              "current_time": "${OffsetDateTime.now()}"
             }""".trim()
 
 
