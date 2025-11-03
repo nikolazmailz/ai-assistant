@@ -175,7 +175,7 @@ class DialogService(
                     payload = "SQL_FOR_AI result $collectResultSql",
                     scheduledAt = Instant.now().plusSeconds(5),
                     source = SourceDialogType.AI,
-                    role = RoleType.ASSISTANT
+                    role = RoleType.SYSTEM
                 )
             )
         }
