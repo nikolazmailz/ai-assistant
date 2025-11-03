@@ -3,6 +3,8 @@ package ru.ai.assistant.db
 import kotlinx.coroutines.reactive.awaitSingle
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class RawSqlService(
@@ -55,6 +57,7 @@ class RawSqlService(
 //    }
 
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     suspend fun executeSmart(sqlRaw: String): Any {
         // 1) срежем ; и пробелы
         val sql = sqlRaw.trim().trimEnd(';').trim()
