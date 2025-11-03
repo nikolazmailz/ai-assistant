@@ -5,6 +5,11 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import io.r2dbc.postgresql.api.PostgresqlException
+import org.springframework.r2dbc.BadSqlGrammarException
+import org.springframework.r2dbc.connection.ConnectionFactoryUtils
+import io.r2dbc.spi.R2dbcDataIntegrityViolationException
+import reactor.core.Exceptions
 
 @Service
 class RawSqlService(
@@ -97,7 +102,49 @@ class RawSqlService(
             }
         } catch (e: Exception) {
             // Полезно логировать первопричину
-            mapOf("type" to "error", "message" to (e.cause?.message ?: e.message))
+//            mapOf("type" to "error", "message" to (e.cause?.message ?: e.message))
+            toErrorPayload(e)
         }
     }
+
+
+    private fun toErrorPayload(t: Throwable): Map<String, Any?> {
+        val e = Exceptions.unwrap(t)
+        return when (e) {
+            is PostgresqlException -> mapOf(
+                "type" to "db_error",
+                "sqlState" to sqlStateOf(e),          // например "23505"
+                "message" to e.message,            // общая
+                "detail" to e.errorDetails.detail, // DETAIL
+                "hint" to e.errorDetails.hint,     // HINT
+                "where" to e.errorDetails.where,   // WHERE
+                "schema" to e.errorDetails.schemaName,
+                "table" to e.errorDetails.tableName,
+                "column" to e.errorDetails.columnName,
+                "constraint" to e.errorDetails.constraintName,
+                "position" to e.errorDetails.position
+            )
+            is R2dbcDataIntegrityViolationException -> mapOf(
+                "type" to "integrity_violation",
+                "sqlState" to e.sqlState,
+                "message" to e.message
+            )
+            is BadSqlGrammarException -> mapOf(
+                "type" to "bad_sql",
+                "sqlState" to sqlStateOf(e),
+                "message" to e.message
+            )
+            else -> mapOf("type" to "error", "message" to (e.message ?: t.message))
+        }
+    }
+
+    private fun sqlStateOf(any: Any): String? {
+        // 1) Попробуем метод getSqlState()
+        runCatching { any.javaClass.getMethod("getSqlState").invoke(any) as? String }.getOrNull()?.let { return it }
+        // 2) Попробуем публичное/приватное поле sqlState
+        return runCatching {
+            any.javaClass.getDeclaredField("sqlState").apply { isAccessible = true }.get(any) as? String
+        }.getOrNull()
+    }
+
 }
