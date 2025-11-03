@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/changes/010-rename-content-to-prompt.sql
   - include:
       file: db/changelog/changes/011-update-prompt.sql
+  - include:
+      file: db/changelog/changes/012-update-prompt.sql

@@ -36,7 +36,7 @@ class PromptComponent(
         val systemPrompt = "$dialogInfoPrompt \n " +
                 "$WHO_AMI \n " +
                 "${dialogInfo.levelOfResponseCompleteness?.levelPrompt} \n " +
-                "$globalPromptContent \n Твои знания: $knowledge \n" +
+                "$globalPromptContent \n Контекстные знания: $knowledge \n" +
                 ""
 
 //        log.debug { "\n\n collectSystemPrompt \n" }
